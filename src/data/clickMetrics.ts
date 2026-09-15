@@ -2,9 +2,9 @@
  * Pure helpers for the anonymous click counters: how an hour bucket is derived,
  * and how a set of counters is turned into the figures the dashboard shows.
  *
- * Deliberately free of any Firebase import, so the bucketing logic — which must
- * agree exactly with the constraints in firestore.rules — can be tested on its
- * own.
+ * Deliberately free of any network dependency, so the bucketing logic — which
+ * must agree with the hour the database function records against — can be
+ * tested on its own.
  */
 
 export type HourlyCount = {
@@ -13,7 +13,7 @@ export type HourlyCount = {
   clickCount: number
 }
 
-/** `2026-09-14T15` — the hour bucket, also the document id suffix. */
+/** `2026-09-14T15` — a stable key for an hour bucket. */
 export function hourKey(date: Date = new Date()): string {
   return date.toISOString().slice(0, 13)
 }
@@ -23,11 +23,6 @@ export function truncateToHour(date: Date = new Date()): Date {
   const hour = new Date(date)
   hour.setUTCMinutes(0, 0, 0)
   return hour
-}
-
-/** The rules require the game id to be the first segment of the document id. */
-export function counterId(gameId: string, date: Date = new Date()): string {
-  return `${gameId}_${hourKey(date)}`
 }
 
 export function totalClicks(counts: HourlyCount[]): number {

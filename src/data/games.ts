@@ -1,136 +1,145 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  where,
-  type DocumentData,
-  type QueryDocumentSnapshot,
-} from 'firebase/firestore'
-import { db } from '../firebase/app'
+import { supabase } from '../supabase/client'
+import type { GameRow, GameWriteRow } from '../supabase/types'
 import type { Game, GameInput, StoredImage } from '../types/game'
 
 /**
- * Every Firestore and Storage access for the catalog lives here. Pages and
- * components call these functions rather than touching the SDK, so the query
- * shapes stay in step with firestore.rules — in particular the mandatory
- * `where('published', '==', true)` on public reads.
+ * Every catalog read and write. Pages and components call these functions
+ * rather than the Supabase client, so column names and query shapes stay in one
+ * place.
  */
 
 const GAMES = 'games'
 
-function toGame(snapshot: QueryDocumentSnapshot<DocumentData>): Game {
-  const data = snapshot.data()
+function toGame(row: GameRow): Game {
   return {
-    id: snapshot.id,
-    name: data.name ?? '',
-    shortDescription: data.shortDescription ?? '',
-    fullDescription: data.fullDescription ?? '',
-    learningObjectives: data.learningObjectives ?? [],
-    audience: data.audience ?? '',
-    minPlayers: data.minPlayers ?? 1,
-    maxPlayers: data.maxPlayers ?? 1,
-    durationMinutes: data.durationMinutes ?? 0,
-    categories: data.categories ?? [],
-    tags: data.tags ?? [],
-    resources: data.resources ?? [],
-    thumbnail: data.thumbnail ?? null,
-    screenshots: data.screenshots ?? [],
-    launchUrl: data.launchUrl ?? '',
-    published: data.published ?? false,
-    sortOrder: data.sortOrder ?? 0,
-    createdAt: data.createdAt ?? null,
-    updatedAt: data.updatedAt ?? null,
+    id: row.id,
+    name: row.name,
+    shortDescription: row.short_description,
+    fullDescription: row.full_description,
+    learningObjectives: row.learning_objectives ?? [],
+    audience: row.audience ?? '',
+    minPlayers: row.min_players,
+    maxPlayers: row.max_players,
+    durationMinutes: row.duration_minutes,
+    categories: row.categories ?? [],
+    tags: row.tags ?? [],
+    resources: row.resources ?? [],
+    thumbnail: row.thumbnail,
+    screenshots: row.screenshots ?? [],
+    launchUrl: row.launch_url,
+    published: row.published,
+    sortOrder: row.sort_order,
+    createdAt: row.created_at ? new Date(row.created_at) : null,
+    updatedAt: row.updated_at ? new Date(row.updated_at) : null,
+  }
+}
+
+function toRow(gameId: string, input: GameInput): GameWriteRow {
+  return {
+    id: gameId,
+    name: input.name,
+    short_description: input.shortDescription,
+    full_description: input.fullDescription,
+    learning_objectives: input.learningObjectives,
+    audience: input.audience,
+    min_players: input.minPlayers,
+    max_players: input.maxPlayers,
+    duration_minutes: input.durationMinutes,
+    categories: input.categories,
+    tags: input.tags,
+    resources: input.resources,
+    thumbnail: input.thumbnail,
+    screenshots: input.screenshots,
+    launch_url: input.launchUrl,
+    published: input.published,
+    sort_order: input.sortOrder,
   }
 }
 
 /* ─── Public reads ──────────────────────────────────────────────────────────*/
 
 /**
- * The public catalog. The `published` filter is not cosmetic: the security
- * rules reject any listing of `games` that is not constrained this way.
+ * The public catalog. Unpublished entries are filtered out by row level
+ * security, so this returns only what the caller is allowed to see.
  */
 export async function listPublishedGames(): Promise<Game[]> {
-  const snapshot = await getDocs(
-    query(
-      collection(db, GAMES),
-      where('published', '==', true),
-      orderBy('sortOrder', 'asc'),
-      orderBy('name', 'asc'),
-    ),
-  )
-  return snapshot.docs.map(toGame)
+  const { data, error } = await supabase
+    .from(GAMES)
+    .select('*')
+    .eq('published', true)
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map(toGame)
 }
 
 /**
  * A single catalog entry. Returns null both when the game does not exist and
- * when it is unpublished — the rules deny the read in the second case, and the
- * public site should not distinguish between the two.
+ * when the caller may not see it — the public site should not distinguish
+ * between the two.
  */
 export async function getGame(gameId: string): Promise<Game | null> {
-  try {
-    const snapshot = await getDoc(doc(db, GAMES, gameId))
-    if (!snapshot.exists()) return null
-    return toGame(snapshot as QueryDocumentSnapshot<DocumentData>)
-  } catch {
-    return null
-  }
+  const { data, error } = await supabase.from(GAMES).select('*').eq('id', gameId).maybeSingle()
+
+  if (error || !data) return null
+  return toGame(data)
 }
 
-/* ─── Admin reads and writes ────────────────────────────────────────────────*/
+/* ─── Administrator reads and writes ────────────────────────────────────────*/
 
-/** Every entry, published or not. Allowed only for administrators. */
+/** Every entry, published or not. The policies allow this only for admins. */
 export async function listAllGames(): Promise<Game[]> {
-  const snapshot = await getDocs(query(collection(db, GAMES), orderBy('sortOrder', 'asc')))
-  return snapshot.docs.map(toGame)
+  const { data, error } = await supabase
+    .from(GAMES)
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []).map(toGame)
 }
 
 export async function gameIdExists(gameId: string): Promise<boolean> {
-  const snapshot = await getDoc(doc(db, GAMES, gameId))
-  return snapshot.exists()
+  const { count, error } = await supabase
+    .from(GAMES)
+    .select('id', { count: 'exact', head: true })
+    .eq('id', gameId)
+
+  if (error) throw new Error(error.message)
+  return (count ?? 0) > 0
 }
 
 export async function createGame(gameId: string, input: GameInput): Promise<void> {
-  await setDoc(doc(db, GAMES, gameId), {
-    ...input,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  })
+  const { error } = await supabase.from(GAMES).insert(toRow(gameId, input))
+  if (error) throw new Error(error.message)
 }
 
 export async function updateGame(gameId: string, input: GameInput): Promise<void> {
-  // `createdAt` is deliberately omitted: the rules require it to survive
-  // unchanged, and leaving it out lets the stored value carry over.
-  await updateDoc(doc(db, GAMES, gameId), { ...input, updatedAt: serverTimestamp() })
+  const { error } = await supabase.from(GAMES).update(toRow(gameId, input)).eq('id', gameId)
+  if (error) throw new Error(error.message)
 }
 
 export async function setGamePublished(gameId: string, published: boolean): Promise<void> {
-  await updateDoc(doc(db, GAMES, gameId), { published, updatedAt: serverTimestamp() })
+  const { error } = await supabase.from(GAMES).update({ published }).eq('id', gameId)
+  if (error) throw new Error(error.message)
 }
 
 /**
- * Removes the catalog entry and the images it owns. The Firestore document goes
- * first: if an image delete fails the entry is still gone from the catalog, and
- * the leftover file is harmless. The reverse order could leave a published game
+ * Removes the catalog entry and the images it owns. The row goes first: if an
+ * image delete fails the entry is still gone from the catalog and the leftover
+ * file is harmless, whereas the reverse order could leave a published game
  * pointing at missing images.
  */
 export async function deleteGame(game: Game): Promise<void> {
-  await deleteDoc(doc(db, GAMES, game.id))
+  const { error } = await supabase.from(GAMES).delete().eq('id', game.id)
+  if (error) throw new Error(error.message)
+
   const images = [game.thumbnail, ...game.screenshots].filter(
     (image): image is StoredImage => image !== null,
   )
   if (images.length === 0) return
 
-  const { deleteCatalogImage } = await import('./images')
-  await Promise.allSettled(images.map((image) => deleteCatalogImage(image)))
+  const { deleteCatalogImages } = await import('./images')
+  await deleteCatalogImages(images)
 }
-
-/* Catalog images live in `images.ts`. They are deliberately NOT re-exported
-   here: a static re-export would pull the Cloud Storage SDK back into the
-   public bundle, which is exactly what that split avoids. */

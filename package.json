@@ -10,18 +10,15 @@
     "lint": "oxlint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run --project unit",
-    "test:watch": "vitest --project unit",
-    "test:rules": "firebase emulators:exec --project demo-supply --only firestore,storage \"vitest run --project rules\"",
-    "emulators": "firebase emulators:start --project demo-supply --only auth,firestore,storage",
-    "seed": "node scripts/seed-catalog.mjs",
-    "deploy": "npm run build && firebase deploy --only firestore:rules,firestore:indexes,storage,hosting",
-    "seed:emulator": "firebase emulators:exec --project demo-supply --only firestore \"node scripts/seed-catalog.mjs\""
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "node --env-file-if-exists=.env scripts/seed-catalog.mjs",
+    "deploy": "npm run build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@supabase/supabase-js": "^2.116.0",
     "clsx": "^2.1.1",
-    "firebase": "^12.19.0",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -31,7 +28,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -40,7 +36,6 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "firebase-admin": "^14.4.0",
     "jsdom": "^30.0.1",
     "oxlint": "^1.81.0",
     "prettier": "^3.9.6",

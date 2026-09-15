@@ -14,7 +14,7 @@ describe('game identifier', () => {
 
   it.each([
     ['Beer Game', 'spaces and capitals'],
-    ['beer_game', 'underscores, which would break the analytics document id'],
+    ['beer_game', 'underscores, which the slug constraint rejects'],
     ['-beer', 'a leading hyphen'],
     ['beer--game', 'a doubled hyphen'],
     ['b', 'a single character'],

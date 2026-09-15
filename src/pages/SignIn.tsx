@@ -8,10 +8,10 @@ import { useAuth } from '../auth/useAuth'
 /**
  * Administrator sign-in. Visitors never need this page.
  *
- * When a signed-in account has no `admins/{uid}` document, the page shows the
- * account's UID and how to grant it access. That is deliberate: roles are
- * seeded by hand in the Firebase console precisely so no client code path can
- * grant admin, and the UID is not knowable before the first sign-in.
+ * When a signed-in account has no row in `admins`, the page shows the account's
+ * user id and how to grant it access. That is deliberate: no client path can
+ * write to `admins` — which is what stops anyone promoting themselves — and the
+ * id is not knowable before the first sign-in.
  */
 export default function SignIn() {
   const { user, loading, isAdmin, checkingRole, signIn, signOut } = useAuth()
@@ -39,21 +39,15 @@ export default function SignIn() {
     setError(null)
     try {
       await signIn()
-    } catch (cause) {
-      const code = (cause as { code?: string }).code
-      setError(
-        code === 'auth/popup-closed-by-user'
-          ? 'Sign-in was cancelled.'
-          : 'Sign-in failed. Please try again.',
-      )
-    } finally {
+    } catch {
+      setError('Sign-in failed. Please try again.')
       setBusy(false)
     }
   }
 
-  const copyUid = async () => {
+  const copyUserId = async () => {
     if (!user) return
-    await navigator.clipboard.writeText(user.uid)
+    await navigator.clipboard.writeText(user.id)
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
   }
@@ -76,7 +70,7 @@ export default function SignIn() {
             <CardBody className="flex flex-col gap-4">
               <Button onClick={onSignIn} disabled={busy} size="lg" className="w-full">
                 <LogIn size={16} aria-hidden="true" />
-                {busy ? 'Signing in…' : 'Continue with Google'}
+                {busy ? 'Redirecting…' : 'Continue with Google'}
               </Button>
               {error && (
                 <p role="alert" className="text-sm font-medium text-destructive">
@@ -100,19 +94,17 @@ export default function SignIn() {
               <div className="flex flex-col gap-2">
                 <p className="font-medium text-foreground">To grant access</p>
                 <p>
-                  In the Firebase console, create a document in the{' '}
-                  <code className="rounded-sm bg-muted px-1 py-0.5 text-foreground">admins</code>{' '}
-                  collection whose document ID is the user ID below, containing an{' '}
-                  <code className="rounded-sm bg-muted px-1 py-0.5 text-foreground">email</code>{' '}
-                  field and an{' '}
-                  <code className="rounded-sm bg-muted px-1 py-0.5 text-foreground">addedAt</code>{' '}
-                  timestamp. Then sign out and back in.
+                  In the Supabase SQL editor, run{' '}
+                  <code className="rounded-sm bg-muted px-1 py-0.5 text-foreground">
+                    insert into admins (user_id, email) values (&apos;…&apos;, &apos;…&apos;);
+                  </code>{' '}
+                  with the user id below, then reload this page.
                 </p>
               </div>
 
               <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2">
-                <code className="flex-1 truncate text-xs text-foreground">{user.uid}</code>
-                <Button size="sm" variant="secondary" onClick={copyUid}>
+                <code className="flex-1 truncate text-xs text-foreground">{user.id}</code>
+                <Button size="sm" variant="secondary" onClick={copyUserId}>
                   {copied ? (
                     <>
                       <Check size={14} aria-hidden="true" />

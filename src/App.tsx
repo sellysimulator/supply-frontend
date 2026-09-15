@@ -10,8 +10,8 @@ import SignIn from './pages/SignIn'
 import NotFound from './pages/NotFound'
 import { LoadingSection } from './components/ui'
 
-/* The administration area — and the Cloud Storage code it pulls in — is loaded
-   only when an administrator actually opens it, so visitors never download it. */
+/* The administration area is loaded only when an administrator actually opens
+   it, so visitors never download the editing interface. */
 const AdminLayout = lazy(() =>
   import('./components/layout/AdminLayout').then((m) => ({ default: m.AdminLayout })),
 )
@@ -29,8 +29,8 @@ export default function App() {
         <Route path="games/:gameId" element={<GameDetails />} />
         <Route path="sign-in" element={<SignIn />} />
 
-        {/* The guard is a convenience for the interface. Firestore rules are
-            what actually reject these reads and writes for non-administrators. */}
+        {/* The guard is a convenience for the interface. Row level security is
+            what actually rejects these reads and writes for non-administrators. */}
         <Route
           path="admin"
           element={

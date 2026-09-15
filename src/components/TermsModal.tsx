@@ -42,6 +42,12 @@ export function TermsModal({ open, onClose }: { open: boolean; onClose: () => vo
             link a recorded interaction back to an individual visitor, and we do not attempt to.
           </p>
           <p>
+            To stop automated traffic from distorting these totals, the service briefly keeps a
+            one-way hash of the network address a request came from, grouped by minute and discarded
+            within minutes. It is never stored alongside, or connected to, the record of which game
+            was opened.
+          </p>
+          <p>
             We use these totals only to understand which games attract the most interest and when
             that interest occurs, so the catalog can be curated and improved.
           </p>

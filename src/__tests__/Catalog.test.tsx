@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { emptyGameInput, type Game } from '../types/game'
 
-/* The data layer is mocked, which also keeps Firebase — and its demand for real
-   credentials — out of the unit test environment. */
+/* The data layer is mocked, which also keeps Supabase — and its demand for real
+   project credentials — out of the unit test environment. */
 const listPublishedGames = vi.fn()
 vi.mock('../data/games', () => ({ listPublishedGames: () => listPublishedGames() }))
 

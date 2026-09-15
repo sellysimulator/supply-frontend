@@ -23,12 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local environment and Firebase artefacts
+# Local environment and deploy artefacts
 .env
 .env.local
-*-debug.log
 firebase-debug.log
-firestore-debug.log
-ui-debug.log
-pubsub-debug.log
 .firebase/

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   clicksByGame,
   clicksInLastHours,
-  counterId,
   hourKey,
   hourlySeries,
   totalClicks,
@@ -11,24 +10,15 @@ import {
 } from '../data/clickMetrics'
 
 /** Hours are UTC throughout, so the bucket a click lands in does not depend on
- *  where the visitor is. */
+ *  where the visitor is, and matches the hour the database records against. */
 describe('hour bucketing', () => {
   it('truncates a timestamp to the top of its UTC hour', () => {
     const hour = truncateToHour(new Date('2026-09-14T15:47:31.512Z'))
     expect(hour.toISOString()).toBe('2026-09-14T15:00:00.000Z')
   })
 
-  it('derives the hour key used as the document id suffix', () => {
+  it('derives a stable hour key for a timestamp', () => {
     expect(hourKey(new Date('2026-09-14T15:47:31Z'))).toBe('2026-09-14T15')
-  })
-
-  it('builds a counter id from the game and the hour', () => {
-    expect(counterId('beer-game', new Date('2026-09-14T15:47:31Z'))).toBe('beer-game_2026-09-14T15')
-  })
-
-  it('keeps the game id as the first segment, which the rules check', () => {
-    const id = counterId('beer-game', new Date('2026-09-14T15:00:00Z'))
-    expect(id.split('_')[0]).toBe('beer-game')
   })
 })
 

@@ -10,94 +10,82 @@ release cycle. Supply stores only the catalog metadata and the launch URL.
 
 ## Architecture
 
-A static React bundle on Firebase Hosting, talking directly to Firebase from the
-browser. There is no application server.
+A static React bundle talking directly to Supabase from the browser. There is no
+application server.
 
 ```
 Supply
 ├── React frontend on Firebase Hosting
-├── Firebase Authentication (Google, administrators only)
-├── Cloud Firestore — catalog entries
-├── Cloud Firestore — anonymous click analytics
-├── Cloud Storage — catalog images
+├── Supabase Auth (Google, administrators only)
+├── Postgres — catalog entries
+├── Postgres — anonymous click analytics
+├── Supabase Storage — catalog images
 └── Protected admin portal
 ```
 
-Because there is no server, **Security Rules are the authorization**. Hiding the
-admin interface is not a control; `firestore.rules` and `storage.rules` are, and
-they are covered by the test suite in `tests/rules/`.
+Because there is no server, **row level security is the authorization**. Hiding
+the admin interface is not a control; the policies in `supabase/migrations/` are,
+and `supabase/verify.sql` proves they hold.
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.example .env     # fill in from the Firebase console
+cp .env.example .env     # fill in from the Supabase dashboard
 npm run dev
 ```
 
-To work without a Firebase project at all, against the local emulator suite:
-
-```bash
-cp .env.emulator .env    # demo config, VITE_USE_EMULATORS=true
-npm run emulators        # terminal 1 — auth, firestore, storage
-npm run seed:emulator    # optional — loads scripts/seed-games.json
-npm run dev              # terminal 2
-```
-
-Switching back to the real project means copying `.env.example` over `.env` and
-setting `VITE_USE_EMULATORS=false`; otherwise the app keeps talking to the
-emulator and the catalog looks empty.
-
 ## Scripts
 
-| Script                            | What it does                                  |
-| --------------------------------- | --------------------------------------------- |
-| `npm run dev`                     | Vite dev server                               |
-| `npm run build`                   | Type-check and build to `dist/`               |
-| `npm test`                        | Unit tests (jsdom)                            |
-| `npm run test:rules`              | Security-rule tests against the emulator      |
-| `npm run emulators`               | Start the local Firebase emulator suite       |
-| `npm run seed`                    | Bulk-load catalog entries (see below)         |
-| `npm run lint` / `npm run format` | oxlint / Prettier                             |
-| `npm run deploy`                  | Build, then deploy rules, indexes and hosting |
+| Script                            | What it does                          |
+| --------------------------------- | ------------------------------------- |
+| `npm run dev`                     | Vite dev server                       |
+| `npm run build`                   | Type-check and build to `dist/`       |
+| `npm test`                        | Unit tests                            |
+| `npm run seed`                    | Bulk-load catalog entries (see below) |
+| `npm run lint` / `npm run format` | oxlint / Prettier                     |
+| `npm run deploy`                  | Build and deploy to Firebase Hosting  |
 
-## First-time Firebase setup
+## First-time Supabase setup
 
-These steps have no CLI equivalent and must be done in the console.
-
-1. **Create the project**, add a **Web app**, and copy its config into `.env`.
-   Put the project id in `.firebaserc` (it currently reads `supply-catalog`).
-2. **Authentication → Sign-in method → Google**: enable.
-3. **Firestore**: create the database in production mode — the rules in this
-   repository replace the defaults on first deploy.
-4. **Storage**: enable.
-5. **App Check**: register the web app with **reCAPTCHA v3** and put the site key
-   in `VITE_RECAPTCHA_SITE_KEY`. For local development, add a debug token under
-   _App Check → Apps → Manage debug tokens_ and set `VITE_APPCHECK_DEBUG_TOKEN`
-   to the same value. Turn on **enforcement** for Firestore and Storage only
-   after the first successful deploy.
-6. **Deploy the rules** before using the app:
-   `firebase deploy --only firestore:rules,firestore:indexes,storage`.
+1. **Create a project** at supabase.com.
+2. **Apply the schema.** In the SQL editor, run
+   `supabase/migrations/0001_catalog.sql` then `supabase/migrations/0002_storage.sql`.
+   The second creates the `catalog-images` bucket and its policies.
+3. **Check the rules hold.** Run `supabase/verify.sql` in the SQL editor. It
+   seeds fixtures, asserts what anonymous and non-administrator callers can and
+   cannot do, and rolls everything back. Any failure raises an exception; success
+   ends with `All access rule checks passed.`
+4. **Enable Google sign-in.** _Authentication → Providers → Google_. You need a
+   Google Cloud OAuth client; paste its client ID and secret, and add the
+   callback URL Supabase shows you to that client's authorized redirect URIs.
+5. **Set the redirect URLs.** _Authentication → URL Configuration_: set the site
+   URL to your deployed origin and add `http://localhost:5173` plus your
+   deployed origin to the redirect allow list. Sign-in is a redirect flow and
+   will fail without this.
+6. **Fill in `.env`** from _Project Settings → Data API_: the project URL and the
+   anon (publishable) key. Only these two values; see `.env.example`.
 
 ### Becoming an administrator
 
-Administrator roles live in a protected `admins/{uid}` collection. No client code
-path can write to it — that is the point — so the first administrator is seeded
-by hand:
+Administrator roles live in the `admins` table. No policy grants insert, update
+or delete — that is what stops anyone promoting themselves — so the first
+administrator is added with the service role:
 
 1. Sign in at `/sign-in` with the Google account that should be an administrator.
-2. The page reports that the account is not an administrator and shows its UID.
-3. In the Firebase console, create `admins/{that-uid}` with fields `email`
-   (string) and `addedAt` (timestamp).
-4. Add the same email address to the allowlist in `storage.rules` and run
-   `firebase deploy --only storage`.
-5. Sign out and back in.
+2. The page reports that the account is not an administrator and shows its user
+   id.
+3. In the SQL editor, run:
 
-Step 4 is needed because **Storage rules cannot read Firestore**, so image
-uploads are gated on an email allowlist rather than the `admins` collection. The
-two must be kept in step by hand. If that becomes tedious, the upgrade path is a
-custom claim set by a Cloud Function — not built here, because Supply is
-intentionally serverless.
+   ```sql
+   insert into admins (user_id, email)
+   values ('<the user id>', '<the email>');
+   ```
+
+4. Reload the page.
+
+The same `is_admin()` check gates the catalog tables and the image bucket, so
+this one row grants everything — there is nothing else to keep in step.
 
 ## Seeding the catalog
 
@@ -105,50 +93,57 @@ Everyday edits belong in the admin portal. For an initial bulk load, edit
 `scripts/seed-games.json` and run:
 
 ```bash
-# against the emulator
-firebase emulators:exec --only firestore "npm run seed"
-
-# against the real project
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json npm run seed
+npm run seed
 ```
 
-Existing entries are skipped unless `--force` is passed.
+It reads `VITE_SUPABASE_URL` and `SUPABASE_SECRET_KEY` from `.env`, so a
+filled-in `.env` is all it needs. Existing entries are skipped unless `--force`
+is passed.
+
+The secret key bypasses row level security. It is read in Node only, and its
+name has no `VITE_` prefix, so Vite never compiles it into a browser bundle.
 
 ## Data model
 
-### `games/{gameId}`
+### `games`
 
-The document id is a slug (`beer-game`) and is also the URL segment and the
-prefix of every analytics counter for that game, so it cannot be renamed in
-place.
+`id` is a slug (`beer-game`), enforced by a check constraint. It is also the
+public URL segment and the key every analytics counter is recorded against, so
+it cannot be renamed in place.
 
-Fields: `name`, `shortDescription`, `fullDescription`, `learningObjectives[]`,
-`audience`, `minPlayers`, `maxPlayers`, `durationMinutes`, `categories[]`,
-`tags[]`, `resources[]`, `thumbnail`, `screenshots[]`, `launchUrl`, `published`,
-`sortOrder`, `createdAt`, `updatedAt`.
+Public reads are limited to published entries by the policy
+`published or is_admin()`; writes require `is_admin()`.
 
-Public reads are limited to published entries. Because Security Rules filter
-documents rather than queries, the catalog **must** query
-`where('published', '==', true)` — an unconstrained listing is rejected.
+### `admins`
 
-### `admins/{uid}`
+`(user_id, email, added_at)`. Readable only by the user it describes, and not
+writable by any client.
 
-`{ email, addedAt }`. Readable only by the user it describes; not writable by any
-client.
+### `click_counts`
 
-### `clickCounts/{gameId}_{YYYY-MM-DDTHH}`
+`(game_id, hour, click_count)` — one row per game per hour.
 
-`{ gameId, hour, clickCount }` — one counter per game per hour.
+No visitor identifier is recorded: no name, email, account id, cookie, session
+or address. No policy allows a client to insert, update or delete here. The only
+way in is `record_game_click(p_game_id)`, a security definer function whose sole
+possible effect is to add one to the current hour's count for a **published**
+game. It cannot be made to set an arbitrary value, backdate a counter, or store
+anything about the caller.
 
-No visitor identifier of any kind is recorded: no name, email, UID, cookie,
-session id or address. Anonymous visitors must be able to write here, so the
-rules constrain the _transition_ rather than the writer: a counter may only be
-created at 1 or raised by exactly 1, must belong to a published game, must be
-stamped with the current hour, and may never be read or deleted by the public.
-App Check is what makes repeating a legal write expensive for a bot.
+Counters have no foreign key to `games`, so deleting a game never rewrites
+history.
 
-Counters are never deleted, including when a game is deleted, so historical
-analytics survive catalog changes.
+### Abuse protection
+
+`record_game_click` throttles per caller: it keeps a salted one-way hash of the
+request's address in `click_rate_limit`, bucketed by minute and pruned after ten,
+and stops counting past 20 calls a minute. The salt lives in `analytics_secrets`,
+generated randomly when the migration runs. Both tables have row level security
+on and no policies at all, so nothing outside the function can read them. The
+hash is never written to, or joined with, `click_counts`.
+
+The function returns normally when throttled, so a client cannot detect the
+ceiling and adapt to it.
 
 ## Design
 
@@ -164,11 +159,20 @@ the primitives in `src/components/ui/` so pages cannot fork the styling.
 ## Testing
 
 ```bash
-npm test           # 52 unit tests — bucketing, schema, pages, components
-npm run test:rules # 37 rule tests — starts the emulator, runs, shuts down
+npm test    # 58 unit tests — bucketing, schema, pages, components, data layer
 ```
 
-The rules suite is the real specification of who can do what: it asserts that
-unpublished games are invisible, that non-admins cannot write to the catalog,
-that analytics counters can only be nudged by one, and that nobody can grant
-themselves admin.
+The access rules are not covered by these: they run inside Postgres, so they are
+verified by running `supabase/verify.sql` against the database. That script is
+the real specification of who can do what — it asserts that unpublished games
+are invisible, that non-administrators cannot write to the catalog, that the
+click counters cannot be read or forged, that the rate limit holds, and that
+nobody can grant themselves administrator.
+
+## Deployment
+
+The site is a static bundle on Firebase Hosting (the free tier, no billing
+account required). `npm run deploy` builds and deploys it. The GitHub workflows
+in `.github/workflows/` do the same on push and on pull requests; they need
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository secrets,
+because those values are compiled into the bundle at build time.

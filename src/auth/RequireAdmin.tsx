@@ -5,8 +5,9 @@ import { useAuth } from './useAuth'
 
 /**
  * Keeps the administration area out of the interface for everyone who is not an
- * administrator. This is a convenience, not a security boundary: Firestore
- * rules reject the underlying reads and writes regardless of what renders.
+ * administrator. This is a convenience, not a security boundary: the row level
+ * security policies reject the underlying reads and writes regardless of what
+ * renders.
  */
 export function RequireAdmin({ children }: { children: ReactNode }) {
   const { user, loading, isAdmin, checkingRole } = useAuth()

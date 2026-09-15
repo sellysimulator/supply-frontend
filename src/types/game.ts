@@ -1,9 +1,8 @@
 import { z } from 'zod'
-import type { Timestamp } from 'firebase/firestore'
 
 /**
  * The catalog's domain model. One schema drives the admin form's validation,
- * the Firestore write path, and the TypeScript types the whole app reads, so
+ * the database write path, and the TypeScript types the whole app reads, so
  * the three cannot drift apart.
  */
 
@@ -23,7 +22,7 @@ const httpsUrl = z
   .refine((value) => value.startsWith('https://'), 'URL must start with https://')
 
 export const storedImageSchema = z.object({
-  /** Cloud Storage object path, kept so the file can be deleted with the game. */
+  /** Storage object path, kept so the file can be deleted with the game. */
   path: z.string(),
   url: z.string().url(),
 })
@@ -65,11 +64,11 @@ export type GameInput = z.infer<typeof gameInputSchema>
 export type StoredImage = z.infer<typeof storedImageSchema>
 export type GameResource = z.infer<typeof resourceSchema>
 
-/** A catalog entry as read back from Firestore. */
+/** A catalog entry as read back from the database. */
 export type Game = GameInput & {
   id: string
-  createdAt: Timestamp | null
-  updatedAt: Timestamp | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 /** Defaults for a blank "add game" form. */

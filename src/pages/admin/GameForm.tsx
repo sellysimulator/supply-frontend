@@ -45,7 +45,7 @@ export default function GameForm() {
   } = useAsync(() => (gameId ? getGame(gameId) : Promise.resolve(null)), [gameId])
 
   /* For a new entry the identifier is part of the form, because it becomes the
-     document id and the public URL. For an existing entry it is immutable —
+     primary key and the public URL. For an existing entry it is immutable —
      changing it would orphan the analytics counters keyed on it. */
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
