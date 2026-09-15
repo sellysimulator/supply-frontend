@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Design tokens — the single source of truth for Supply's visual language.
+
+   Direction: minimal, modern, formal, blue. Flat fills only; there are no
+   gradients anywhere in this application by design. Components reference these
+   tokens through Tailwind utilities (bg-primary, text-muted-foreground, …) and
+   must never hardcode a hex value.
+
+   See design-system/supply/MASTER.md for the reasoning behind these choices.
+   ───────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Brand */
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-subtle: #eff6ff;
+  --color-on-primary: #ffffff;
+
+  /* Surfaces */
+  --color-background: #f8fafc;
+  --color-card: #ffffff;
+  --color-muted: #f1f5f9;
+
+  /* Text */
+  --color-foreground: #0f172a;
+  --color-muted-foreground: #475569;
+
+  /* Lines and focus */
+  --color-border: #e2e8f0;
+  --color-ring: #1d4ed8;
+
+  /* Status — used only for state, never as decoration */
+  --color-destructive: #dc2626;
+  --color-destructive-hover: #b91c1c;
+  --color-on-destructive: #ffffff;
+  --color-success: #047857;
+  --color-success-subtle: #ecfdf5;
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Swiss-minimal geometry: small radii, never pill-shaped */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* A single, consistent focus ring across every interactive element. Never
+     removed — only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    text-wrap: balance;
+  }
+
+  /* Motion is subtle by default and disappears entirely for users who ask. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

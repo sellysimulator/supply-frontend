@@ -1,0 +1,26 @@
+[
+  {
+    "id": "selly",
+    "name": "Selly",
+    "shortDescription": "A real-time multiplayer supply chain simulator inspired by the Beer Game.",
+    "fullDescription": "Selly puts a small group in charge of consecutive stages of a supply chain and asks each player to decide, round after round, how much to order from the stage upstream.\n\nBecause orders take time to arrive and nobody can see the whole chain at once, small swings in customer demand grow into large swings in factory output — the bullwhip effect, experienced rather than described. Sessions are hosted in rooms: one player creates the room and shares the code, the rest join, and the simulation runs in real time until the final round.\n\nThe debrief is where the learning lands. Cost curves for every stage are shown side by side, so a group can see exactly where inventory piled up, where a stockout started, and how a single cautious over-order propagated backwards through the chain.",
+    "learningObjectives": [
+      "Experience the bullwhip effect first-hand rather than in the abstract",
+      "Reason about how information delay distorts ordering decisions",
+      "Weigh the cost of holding inventory against the cost of a stockout",
+      "Recognise how local optimisation harms overall supply chain performance"
+    ],
+    "audience": "Undergraduate and graduate operations students",
+    "minPlayers": 2,
+    "maxPlayers": 8,
+    "durationMinutes": 60,
+    "categories": ["Simulation", "Multiplayer"],
+    "tags": ["beer game", "bullwhip effect", "inventory", "real-time"],
+    "resources": [],
+    "thumbnail": null,
+    "screenshots": [],
+    "launchUrl": "https://sellysim.web.app",
+    "published": true,
+    "sortOrder": 0
+  }
+]

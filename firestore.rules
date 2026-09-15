@@ -1,0 +1,157 @@
+rules_version = '2';
+
+// Supply catalog — authorization lives here, not in the React interface.
+// The admin UI is a convenience; these rules are the actual enforcement, which
+// is why they are covered by tests in tests/rules/.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+
+    // Administrators are recorded as a document in `admins`, keyed by Firebase
+    // UID. That collection is written only from the Firebase console, so this
+    // check cannot be escalated into from the client.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isPublishedGame(gameId) {
+      let gameRef = /databases/$(database)/documents/games/$(gameId);
+      return exists(gameRef) && get(gameRef).data.published == true;
+    }
+
+    function isNonEmptyString(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    function isHttpsUrl(value) {
+      return value is string && value.matches('https://.*') && value.size() <= 2000;
+    }
+
+    function isStringList(value, maxItems) {
+      return value is list && value.size() <= maxItems;
+    }
+
+    // A stored image is { path, url } or absent entirely.
+    function isStoredImage(value) {
+      return value == null
+        || (value is map
+            && value.keys().hasAll(['path', 'url'])
+            && value.keys().hasOnly(['path', 'url'])
+            && value.path is string
+            && value.url is string);
+    }
+
+    function isValidGame(game) {
+      return game.keys().hasAll([
+              'name', 'shortDescription', 'fullDescription', 'learningObjectives',
+              'audience', 'minPlayers', 'maxPlayers', 'durationMinutes',
+              'categories', 'tags', 'resources', 'thumbnail', 'screenshots',
+              'launchUrl', 'published', 'sortOrder', 'createdAt', 'updatedAt'
+            ])
+        && game.keys().hasOnly([
+              'name', 'shortDescription', 'fullDescription', 'learningObjectives',
+              'audience', 'minPlayers', 'maxPlayers', 'durationMinutes',
+              'categories', 'tags', 'resources', 'thumbnail', 'screenshots',
+              'launchUrl', 'published', 'sortOrder', 'createdAt', 'updatedAt'
+            ])
+        && isNonEmptyString(game.name, 120)
+        && isNonEmptyString(game.shortDescription, 200)
+        && isNonEmptyString(game.fullDescription, 20000)
+        && isStringList(game.learningObjectives, 20)
+        && game.audience is string && game.audience.size() <= 160
+        && game.minPlayers is int && game.minPlayers >= 1 && game.minPlayers <= 1000
+        && game.maxPlayers is int && game.maxPlayers >= game.minPlayers
+        && game.maxPlayers <= 1000
+        && game.durationMinutes is int && game.durationMinutes >= 1
+        && game.durationMinutes <= 10080
+        && isStringList(game.categories, 20)
+        && isStringList(game.tags, 30)
+        && isStringList(game.resources, 20)
+        && isStoredImage(game.thumbnail)
+        && game.screenshots is list && game.screenshots.size() <= 12
+        && isHttpsUrl(game.launchUrl)
+        && game.published is bool
+        && game.sortOrder is int;
+    }
+
+    // ─── Catalog ─────────────────────────────────────────────────────────────
+
+    match /games/{gameId} {
+      // Anyone may read a published entry. Because rules filter documents
+      // rather than queries, the public catalog must query
+      // `where('published', '==', true)`; an unconstrained list is rejected.
+      allow read: if resource.data.published == true || isAdmin();
+
+      allow create: if isAdmin()
+        && isValidGame(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isAdmin()
+        && isValidGame(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── Administrator roles ─────────────────────────────────────────────────
+
+    match /admins/{uid} {
+      // A signed-in user may check their own role; nobody may list the
+      // collection or discover other administrators.
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list: if false;
+
+      // Seeded by hand in the Firebase console. No client path can grant admin.
+      allow write: if false;
+    }
+
+    // ─── Anonymous click analytics ───────────────────────────────────────────
+
+    // One document per game per hour: `{gameId}_{YYYY-MM-DDTHH}`, holding only
+    // { gameId, hour, clickCount }. No visitor identifier of any kind is
+    // stored — no name, email, UID, cookie or session id.
+    //
+    // Anonymous visitors must be able to write here, so these rules constrain
+    // the *transition* rather than the writer: a counter may only be created at
+    // 1 or raised by exactly 1, and may never be read or deleted by the public.
+    // App Check is what stops a script from simply repeating a legal write.
+    match /clickCounts/{counterId} {
+      function isWellFormedCounter(data, counterId) {
+        return data.keys().hasOnly(['gameId', 'hour', 'clickCount'])
+          && data.keys().hasAll(['gameId', 'hour', 'clickCount'])
+          && data.gameId is string
+          && data.gameId == counterId.split('_')[0]
+          && data.hour is timestamp
+          // Truncated to the top of the hour, and within a window around now,
+          // so counters cannot be back- or forward-dated.
+          && data.hour.minutes() == 0
+          && data.hour.seconds() == 0
+          && data.hour.toMillis() <= request.time.toMillis()
+          && data.hour.toMillis() > request.time.toMillis() - 7200000;
+      }
+
+      allow get, list: if isAdmin();
+
+      allow create: if isWellFormedCounter(request.resource.data, counterId)
+        && request.resource.data.clickCount == 1
+        && isPublishedGame(request.resource.data.gameId);
+
+      allow update: if isWellFormedCounter(request.resource.data, counterId)
+        && request.resource.data.clickCount == resource.data.clickCount + 1
+        && request.resource.data.gameId == resource.data.gameId
+        && request.resource.data.hour == resource.data.hour;
+
+      // Counters are append-only; history is never rewritten, even by an admin.
+      allow delete: if false;
+    }
+
+    // Anything not matched above is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
