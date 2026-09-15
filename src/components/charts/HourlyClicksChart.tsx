@@ -1,13 +1,16 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Td, Th } from '../ui'
 
 export type HourPoint = { hour: Date; clickCount: number }
 
-const hourLabel = (hour: Date) =>
-  hour.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+/* Dates are formatted in the reader's language, so an hour reads the way they
+   expect rather than the way the build machine does. */
+const hourLabel = (hour: Date, locale: string) =>
+  hour.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 
-const fullLabel = (hour: Date) =>
-  `${hour.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${hourLabel(hour)}`
+const fullLabel = (hour: Date, locale: string) =>
+  `${hour.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}, ${hourLabel(hour, locale)}`
 
 /**
  * Game launches per hour — a single series, so there is no legend (the title
@@ -18,6 +21,8 @@ const fullLabel = (hour: Date) =>
  * their slot, and separated by a surface gap rather than a stroke.
  */
 export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage ?? 'en'
   const [hovered, setHovered] = useState<HourPoint | null>(null)
   const [showTable, setShowTable] = useState(false)
 
@@ -52,7 +57,11 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
               <div
                 className="relative h-56"
                 role="img"
-                aria-label={`Game launches per hour over the last ${points.length} hours. ${total} launches in total, peaking at ${points[peakIndex]?.clickCount ?? 0}.`}
+                aria-label={t('admin.chart.hourlyAlt', {
+                  hours: points.length,
+                  total,
+                  peak: points[peakIndex]?.clickCount ?? 0,
+                })}
               >
                 {/* Gridlines: solid hairlines one step off the surface. */}
                 {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
@@ -101,7 +110,7 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
                   <div key={point.hour.toISOString()} className="flex-1 text-center">
                     {index % 6 === 0 && (
                       <span className="text-[11px] whitespace-nowrap text-muted-foreground tabular-nums">
-                        {hourLabel(point.hour)}
+                        {hourLabel(point.hour, locale)}
                       </span>
                     )}
                   </div>
@@ -116,9 +125,9 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
             aria-live="polite"
             className="pointer-events-none absolute top-0 right-0 rounded-md border border-border bg-card px-3 py-2 text-xs"
           >
-            <p className="font-medium text-foreground">{fullLabel(hovered.hour)}</p>
+            <p className="font-medium text-foreground">{fullLabel(hovered.hour, locale)}</p>
             <p className="text-muted-foreground tabular-nums">
-              {hovered.clickCount} {hovered.clickCount === 1 ? 'launch' : 'launches'}
+              {t('admin.dashboard.launchCount', { count: hovered.clickCount })}
             </p>
           </div>
         )}
@@ -131,17 +140,17 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
           aria-expanded={showTable}
           className="cursor-pointer text-xs font-medium text-primary underline underline-offset-4 transition-colors duration-200 hover:text-primary-hover"
         >
-          {showTable ? 'Hide data table' : 'Show data table'}
+          {t(showTable ? 'admin.chart.hideTable' : 'admin.chart.showTable')}
         </button>
       </div>
 
       {showTable && (
         <Table>
-          <caption className="sr-only">Game launches per hour</caption>
+          <caption className="sr-only">{t('admin.chart.tableCaption')}</caption>
           <thead>
             <tr>
-              <Th>Hour</Th>
-              <Th className="text-right">Launches</Th>
+              <Th>{t('admin.chart.hour')}</Th>
+              <Th className="text-right">{t('admin.chart.launches')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -149,7 +158,7 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
               .filter((point) => point.clickCount > 0)
               .map((point) => (
                 <tr key={point.hour.toISOString()}>
-                  <Td>{fullLabel(point.hour)}</Td>
+                  <Td>{fullLabel(point.hour, locale)}</Td>
                   <Td className="text-right tabular-nums">{point.clickCount}</Td>
                 </tr>
               ))}

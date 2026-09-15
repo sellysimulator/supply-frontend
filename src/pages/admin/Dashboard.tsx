@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BarChart3, LibraryBig, MousePointerClick, TrendingUp } from 'lucide-react'
 import {
   Button,
@@ -25,6 +26,7 @@ import { useAsync } from '../../hooks/useAsync'
 
 /** Anonymous game-click analytics for the last 30 days. */
 export default function Dashboard() {
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(async () => {
     const [clicks, games] = await Promise.all([listRecentClicks(30), listAllGames()])
     return { clicks, games }
@@ -51,15 +53,15 @@ export default function Dashboard() {
     }
   }, [data])
 
-  if (loading) return <LoadingSection label="Loading analytics" />
+  if (loading) return <LoadingSection label={t('admin.dashboard.loading')} />
 
   if (error) {
     return (
       <ErrorState
-        description="The analytics could not be loaded."
+        description={t('admin.dashboard.loadError')}
         action={
           <Button variant="secondary" onClick={reload}>
-            Try again
+            {t('common.tryAgain')}
           </Button>
         }
       />
@@ -71,46 +73,47 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-foreground">Analytics</h2>
-        <p className="text-sm text-muted-foreground">
-          Anonymous game launches recorded over the last 30 days. No visitor information is stored —
-          only which game was opened and in which hour.
-        </p>
+        <h2 className="text-lg font-semibold text-foreground">{t('admin.dashboard.title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.dashboard.description')}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
-          label="Launches (30 days)"
+          label={t('admin.dashboard.launches30d')}
           value={view.total.toLocaleString()}
           icon={<MousePointerClick size={16} aria-hidden="true" />}
         />
         <StatTile
-          label="Launches (24 hours)"
+          label={t('admin.dashboard.launches24h')}
           value={view.last24h.toLocaleString()}
           icon={<TrendingUp size={16} aria-hidden="true" />}
         />
         <StatTile
-          label="Most launched"
+          label={t('admin.dashboard.mostLaunched')}
           value={view.topGame ? view.topGame.name : '—'}
-          hint={view.topGame ? `${view.topGame.clickCount} launches` : 'No launches recorded yet'}
+          hint={
+            view.topGame
+              ? t('admin.dashboard.launchCount', { count: view.topGame.clickCount })
+              : t('admin.dashboard.noLaunchesYet')
+          }
           icon={<BarChart3 size={16} aria-hidden="true" />}
         />
         <StatTile
-          label="Published games"
+          label={t('admin.dashboard.publishedGames')}
           value={view.publishedCount}
-          hint={`${view.totalGames} ${view.totalGames === 1 ? 'entry' : 'entries'} in total`}
+          hint={t('admin.dashboard.entryCount', { count: view.totalGames })}
           icon={<LibraryBig size={16} aria-hidden="true" />}
         />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Launches per hour, last 48 hours</CardTitle>
+          <CardTitle>{t('admin.dashboard.hourlyTitle')}</CardTitle>
         </CardHeader>
         <CardBody>
           {view.total === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No launches have been recorded yet.
+              {t('admin.dashboard.hourlyEmpty')}
             </p>
           ) : (
             <HourlyClicksChart points={view.series} />
@@ -120,13 +123,13 @@ export default function Dashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Launches per game, last 30 days</CardTitle>
+          <CardTitle>{t('admin.dashboard.perGameTitle')}</CardTitle>
         </CardHeader>
         <CardBody>
           {view.perGame.length === 0 ? (
             <EmptyState
-              title="Nothing to report yet"
-              description="Game launches will appear here once visitors start opening games from the catalog."
+              title={t('admin.dashboard.perGameEmptyTitle')}
+              description={t('admin.dashboard.perGameEmptyDescription')}
             />
           ) : (
             <TopGamesChart rows={view.perGame} />

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { Button, Spinner } from '../ui'
 import { deleteCatalogImage, uploadCatalogImage } from '../../data/images'
@@ -22,6 +23,7 @@ export function ImageUploader({
   multiple?: boolean
   label: string
 }) {
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +41,7 @@ export function ImageUploader({
       }
       onChange(multiple ? [...images, ...uploaded] : (uploaded.slice(-1) as StoredImage[]))
     } catch {
-      setError('Upload failed. Check that you are signed in as an administrator.')
+      setError(t('admin.images.uploadFailed'))
     } finally {
       setBusy(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -76,12 +78,12 @@ export function ImageUploader({
           disabled={disabled || busy}
         >
           {busy ? <Spinner /> : <ImagePlus size={16} aria-hidden="true" />}
-          {busy ? 'Uploading…' : multiple ? 'Add images' : 'Choose image'}
+          {busy
+            ? t('admin.images.uploading')
+            : t(multiple ? 'admin.images.addImages' : 'admin.images.chooseImage')}
         </Button>
         {disabled && (
-          <p className="text-xs text-muted-foreground">
-            Enter the identifier first — it decides where the file is stored.
-          </p>
+          <p className="text-xs text-muted-foreground">{t('admin.images.identifierFirst')}</p>
         )}
       </div>
 
@@ -103,7 +105,7 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={() => void removeImage(image)}
-                aria-label="Remove image"
+                aria-label={t('admin.images.remove')}
                 className="absolute top-1.5 right-1.5 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors duration-200 hover:border-destructive hover:text-destructive"
               >
                 <Trash2 size={14} aria-hidden="true" />

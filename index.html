@@ -15,6 +15,23 @@
       rel="stylesheet"
     />
     <title>Supply — Supply Chain Games &amp; Simulations</title>
+    <script>
+      /* Applies the remembered theme before the first paint, so a reader who
+         chose dark never sees a white flash while React boots. The key and the
+         values match src/theme/context.ts. */
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('supply-theme')
+          var dark =
+            stored === 'dark' ||
+            ((stored === null || stored === 'system') &&
+              matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) document.documentElement.classList.add('dark')
+        } catch (error) {
+          /* Storage can be blocked; the light theme is a fine default. */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

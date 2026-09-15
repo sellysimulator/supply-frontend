@@ -1,0 +1,325 @@
+{
+  "common": {
+    "loading": "Cargando",
+    "tryAgain": "Reintentar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "closeDialog": "Cerrar el diálogo",
+    "somethingWentWrong": "Algo salió mal",
+    "skipToContent": "Ir al contenido"
+  },
+  "nav": {
+    "main": "Principal",
+    "home": "Inicio",
+    "catalog": "Catálogo",
+    "about": "Acerca de",
+    "admin": "Administración",
+    "homeAria": "Supply — inicio",
+    "openMenu": "Abrir el menú",
+    "closeMenu": "Cerrar el menú"
+  },
+  "theme": {
+    "toDark": "Cambiar al tema oscuro",
+    "toLight": "Cambiar al tema claro"
+  },
+  "language": {
+    "switchLabel": "EN",
+    "switchAria": "Switch to English"
+  },
+  "footer": {
+    "label": "Pie de página",
+    "tagline": "Un catálogo de juegos y simulaciones educativas sobre cadenas de suministro.",
+    "terms": "Términos y condiciones"
+  },
+  "landing": {
+    "eyebrow": "Educación en cadena de suministro",
+    "title": "Un catálogo curado de juegos y simulaciones de cadena de suministro",
+    "intro": "Supply reúne juegos educativos —desde el clásico Beer Game hasta simulaciones más recientes— para que docentes y estudiantes encuentren el adecuado, comprendan qué enseña y empiecen a jugar.",
+    "browseCatalog": "Explorar el catálogo",
+    "aboutSupply": "Acerca de Supply",
+    "whatSupplyDoes": "Qué hace Supply",
+    "values": {
+      "find": {
+        "title": "Encuentre el juego adecuado",
+        "body": "Explore las simulaciones por categoría, público, tamaño del grupo y duración de la sesión para ajustar el juego a su clase o taller."
+      },
+      "teach": {
+        "title": "Sepa qué enseña",
+        "body": "Cada entrada expone sus objetivos de aprendizaje, el público al que se dirige y el material de apoyo antes de que dedique una sesión a ella."
+      },
+      "launch": {
+        "title": "Ábralo directamente",
+        "body": "Cada juego funciona como una aplicación independiente. Supply enlaza directamente con él: aquí no hay nada que instalar."
+      }
+    },
+    "featured": {
+      "title": "Juegos del catálogo",
+      "description": "Una selección de lo que está disponible ahora mismo.",
+      "viewAll": "Ver todos",
+      "loading": "Cargando los juegos",
+      "empty": "Todavía no se ha publicado ningún juego. Vuelva a consultarlo pronto."
+    }
+  },
+  "about": {
+    "title": "Acerca de Supply",
+    "description": "Por qué existe este catálogo y de qué es —y de qué no es— responsable.",
+    "p1": "Los juegos y las simulaciones están entre las formas más eficaces de enseñar cómo se comportan las cadenas de suministro. El Beer Game lleva décadas demostrando que una lección sobre los retrasos, la pérdida de información y el efecto látigo cala mucho más cuando se vive que cuando se lee.",
+    "p2": "La dificultad está en encontrarlos. Las simulaciones educativas están dispersas entre páginas universitarias, proyectos de investigación y desarrolladores independientes, y suelen describirse en términos que no dejan claro cuántos jugadores hacen falta, cuánto dura una sesión o qué debe aprender el grupo. Elegir una a menudo obliga a probarla primero.",
+    "p3": "Supply existe para cerrar esa brecha. Es un único lugar donde descubrir juegos de cadena de suministro, leer una descripción homogénea de cada uno y abrir el que encaje. Cada entrada recoge los mismos datos con el mismo formato —objetivos, público, tamaño del grupo, duración, material de apoyo— para poder comparar dos juegos sin conjeturas.",
+    "p4": "El alcance del catálogo es deliberadamente estrecho. No aloja los juegos, no guarda puntuaciones, no gestiona sesiones ni recoge nada sobre quienes juegan. Describe y enlaza; los juegos hacen el resto.",
+    "boundaries": {
+      "catalog": {
+        "title": "Supply es un catálogo",
+        "body": "Supply guarda la descripción de cada juego —qué enseña, a quién se dirige, cuánto dura— junto con un enlace al lugar donde se ejecuta. Ese es todo su cometido."
+      },
+      "independent": {
+        "title": "Los juegos son independientes",
+        "body": "Cada juego del catálogo se construye, se despliega y se mantiene por su cuenta, con su propia interfaz, sus propios datos y su propio calendario de versiones. Supply no los ejecuta ni almacena nada de lo que producen."
+      },
+      "curated": {
+        "title": "Curado, no automatizado",
+        "body": "Las entradas las redacta y revisa el equipo que mantiene el catálogo, de modo que la descripción que lee no depende de que el juego esté en línea en ese momento."
+      }
+    },
+    "cta": {
+      "title": "Empiece por el catálogo",
+      "body": "Explore todo lo publicado, filtre por categoría y abra la ficha de un juego para ver en qué consiste una sesión.",
+      "action": "Explorar el catálogo"
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "description": "Explore los juegos y simulaciones disponibles en Supply. Abra la ficha de un juego para ver qué enseña y cómo llevarlo a cabo.",
+    "loading": "Cargando el catálogo",
+    "loadError": "No se pudo cargar el catálogo. Compruebe su conexión e inténtelo de nuevo.",
+    "filterLabel": "Filtrar por categoría",
+    "all": "Todos",
+    "count_one": "{{count}} juego",
+    "count_other": "{{count}} juegos",
+    "countInCategory_one": "{{count}} juego en {{category}}",
+    "countInCategory_other": "{{count}} juegos en {{category}}",
+    "emptyCategory": {
+      "title": "No hay juegos en esta categoría",
+      "description": "Pruebe con otra categoría o vea todos los juegos.",
+      "action": "Ver todos los juegos"
+    },
+    "empty": {
+      "title": "El catálogo está vacío",
+      "description": "Los juegos aparecerán aquí en cuanto se publiquen."
+    }
+  },
+  "game": {
+    "moreDetails": "Más detalles",
+    "moreDetailsAbout": "Más detalles sobre {{name}}",
+    "thumbnailAlt": "Miniatura de {{name}}",
+    "screenshotAlt": "Captura {{index}} de {{name}}",
+    "screenshotTitle": "Captura de {{name}}",
+    "players_one": "{{count}} jugador",
+    "players_other": "{{count}} jugadores",
+    "playerRange": "{{min}}–{{max}} jugadores",
+    "durationMinutes": "{{count}} min",
+    "durationHours": "{{count}} h",
+    "durationHoursMinutes": "{{hours}} h {{minutes}} min"
+  },
+  "details": {
+    "loading": "Cargando el juego",
+    "back": "Volver al catálogo",
+    "notFoundTitle": "Juego no encontrado",
+    "notFoundDescription": "Este juego no está disponible en el catálogo. Puede que se haya retirado o que todavía no esté publicado.",
+    "about": "Sobre este juego",
+    "objectives": "Objetivos de aprendizaje",
+    "screenshots": "Capturas de pantalla",
+    "launch": "Abrir el juego",
+    "launchNote": "Se abre en una pestaña nueva. Este juego se opera de forma independiente a Supply.",
+    "resources": "Instrucciones y recursos",
+    "tags": "Etiquetas"
+  },
+  "notFound": {
+    "eyebrow": "Error 404",
+    "title": "Página no encontrada",
+    "description": "La página que busca no existe o se ha trasladado.",
+    "home": "Volver al inicio"
+  },
+  "signIn": {
+    "checking": "Comprobando su acceso",
+    "title": "Acceso de administradores",
+    "description": "Esta área es para los administradores del catálogo. No necesita una cuenta para explorar el catálogo ni para abrir un juego.",
+    "continueWithGoogle": "Continuar con Google",
+    "redirecting": "Redirigiendo…",
+    "failed": "No se pudo iniciar sesión. Inténtelo de nuevo.",
+    "notAdminTitle": "Esta cuenta no es de administrador",
+    "notAdminBody": "Ha iniciado sesión como <0>{{email}}</0>, pero esta cuenta no tiene registro de administrador.",
+    "grantAccess": "Para conceder el acceso",
+    "grantAccessBody": "En el editor SQL de Supabase, ejecute <0></0> con el identificador de usuario que aparece debajo y recargue esta página.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "signOut": "Cerrar sesión"
+  },
+  "admin": {
+    "title": "Administración",
+    "signedInAs": "Sesión iniciada como {{email}}",
+    "signOut": "Cerrar sesión",
+    "navLabel": "Administración",
+    "analytics": "Analítica",
+    "games": "Juegos",
+    "loading": "Cargando la administración",
+    "dashboard": {
+      "title": "Analítica",
+      "description": "Aperturas anónimas de juegos registradas durante los últimos 30 días. No se guarda información de las visitas: solo qué juego se abrió y en qué hora.",
+      "loading": "Cargando la analítica",
+      "loadError": "No se pudo cargar la analítica.",
+      "launches30d": "Aperturas (30 días)",
+      "launches24h": "Aperturas (24 horas)",
+      "mostLaunched": "Más abierto",
+      "launchCount_one": "{{count}} apertura",
+      "launchCount_other": "{{count}} aperturas",
+      "noLaunchesYet": "Todavía no hay aperturas registradas",
+      "publishedGames": "Juegos publicados",
+      "entryCount_one": "{{count}} entrada en total",
+      "entryCount_other": "{{count}} entradas en total",
+      "hourlyTitle": "Aperturas por hora, últimas 48 horas",
+      "hourlyEmpty": "Todavía no se ha registrado ninguna apertura.",
+      "perGameTitle": "Aperturas por juego, últimos 30 días",
+      "perGameEmptyTitle": "Todavía no hay nada que mostrar",
+      "perGameEmptyDescription": "Las aperturas aparecerán aquí en cuanto las visitas empiecen a abrir juegos desde el catálogo."
+    },
+    "chart": {
+      "hourlyAlt": "Aperturas de juegos por hora durante las últimas {{hours}} horas. {{total}} aperturas en total, con un máximo de {{peak}}.",
+      "showTable": "Mostrar la tabla de datos",
+      "hideTable": "Ocultar la tabla de datos",
+      "tableCaption": "Aperturas de juegos por hora",
+      "hour": "Hora",
+      "launches": "Aperturas"
+    },
+    "gamesList": {
+      "title": "Juegos",
+      "description": "Entradas del catálogo. Las visitas solo ven los juegos publicados.",
+      "add": "Añadir juego",
+      "loading": "Cargando los juegos",
+      "loadError": "No se pudo cargar el catálogo.",
+      "emptyTitle": "Todavía no hay juegos",
+      "emptyDescription": "Añada la primera entrada del catálogo para empezar.",
+      "columnGame": "Juego",
+      "columnIdentifier": "Identificador",
+      "columnStatus": "Estado",
+      "columnActions": "Acciones",
+      "published": "Publicado",
+      "draft": "Borrador",
+      "publish": "Publicar",
+      "unpublish": "Despublicar",
+      "publishGame": "Publicar {{name}}",
+      "unpublishGame": "Despublicar {{name}}",
+      "editGame": "Editar {{name}}",
+      "deleteGame": "Eliminar {{name}}",
+      "publishFailed": "No se pudo publicar {{name}}.",
+      "unpublishFailed": "No se pudo despublicar {{name}}.",
+      "deleteFailed": "No se pudo eliminar {{name}}.",
+      "deleteTitle": "¿Eliminar este juego?",
+      "deleteBody": "<0>{{name}}</0> se retirará del catálogo junto con las imágenes que se hayan subido. Esta acción no se puede deshacer.",
+      "deleteNote": "Los recuentos de aperturas se conservan, de modo que la analítica histórica queda intacta.",
+      "deleting": "Eliminando…",
+      "confirmDelete": "Eliminar el juego"
+    },
+    "form": {
+      "loading": "Cargando el juego",
+      "notFoundTitle": "Juego no encontrado",
+      "notFoundDescription": "No se pudo cargar esta entrada del catálogo.",
+      "back": "Volver a los juegos",
+      "edit": "Editar {{name}}",
+      "add": "Añadir un juego",
+      "saving": "Guardando…",
+      "saveChanges": "Guardar los cambios",
+      "create": "Crear el juego",
+      "saveFailed": "No se pudo guardar. Compruebe que sigue con la sesión iniciada como administrador e inténtelo de nuevo.",
+      "identitySection": "Identidad",
+      "name": "Nombre",
+      "identifier": "Identificador",
+      "identifierLockedHint": "El identificador no se puede cambiar: la analítica se registra con él.",
+      "identifierHint": "Se usa en la dirección de la página del juego, por ejemplo /games/beer-game.",
+      "identifierTaken": "Ya existe un juego con este identificador",
+      "shortDescription": "Resumen del catálogo",
+      "shortDescriptionHint": "Una frase que se muestra en la tarjeta del catálogo.",
+      "fullDescription": "Descripción completa",
+      "fullDescriptionHint": "Se muestra en la ficha del juego. Deje una línea en blanco entre párrafos.",
+      "sessionSection": "Detalles de la sesión",
+      "minPlayers": "Jugadores mínimos",
+      "maxPlayers": "Jugadores máximos",
+      "duration": "Duración (minutos)",
+      "audience": "Público al que se dirige",
+      "audienceHint": "Por ejemplo: estudiantes de grado en operaciones.",
+      "objectives": "Objetivos de aprendizaje",
+      "objectivesHint": "Uno por entrada. Pulse Intro para añadirlo.",
+      "objectivesPlaceholder": "Comprender el efecto látigo",
+      "categories": "Categorías",
+      "categoriesHint": "Las usa el filtro del catálogo.",
+      "categoriesPlaceholder": "Simulación",
+      "tags": "Etiquetas",
+      "tagsPlaceholder": "efecto látigo",
+      "mediaSection": "Medios",
+      "thumbnail": "Miniatura",
+      "screenshots": "Capturas de pantalla",
+      "linksSection": "Enlaces y publicación",
+      "launchUrl": "URL del juego",
+      "launchUrlHint": "Donde se ejecuta el juego. Debe empezar por https://.",
+      "launchUrlPlaceholder": "https://ejemplo.com/juego",
+      "resources": "Instrucciones y recursos",
+      "sortOrder": "Orden",
+      "sortOrderHint": "Los números más bajos aparecen primero en el catálogo.",
+      "published": "Publicado",
+      "publishedHint": "Los juegos publicados son visibles para todo el mundo en el catálogo público."
+    },
+    "images": {
+      "addImages": "Añadir imágenes",
+      "chooseImage": "Elegir una imagen",
+      "uploading": "Subiendo…",
+      "uploadFailed": "No se pudo subir. Compruebe que tiene la sesión iniciada como administrador.",
+      "identifierFirst": "Introduzca antes el identificador: determina dónde se guarda el archivo.",
+      "remove": "Quitar la imagen"
+    },
+    "resources": {
+      "labelField": "Etiqueta del recurso {{index}}",
+      "urlField": "URL del recurso {{index}}",
+      "labelPlaceholder": "Guía para el facilitador",
+      "urlPlaceholder": "https://ejemplo.com/guia.pdf",
+      "remove": "Quitar el recurso {{index}}",
+      "add": "Añadir un recurso"
+    }
+  },
+  "tagInput": {
+    "placeholder": "Escriba y pulse Intro",
+    "remove": "Quitar {{entry}}"
+  },
+  "validation": {
+    "identifierMin": "El identificador debe tener al menos 2 caracteres",
+    "identifierMax": "El identificador no puede superar los 60 caracteres",
+    "identifierFormat": "Use minúsculas, números y guiones simples (por ejemplo: beer-game)",
+    "urlFull": "Introduzca una URL completa",
+    "urlHttps": "La URL debe empezar por https://",
+    "resourceLabel": "Dé una etiqueta al recurso",
+    "nameRequired": "El nombre es obligatorio",
+    "nameMax": "El nombre no puede superar los 120 caracteres",
+    "shortDescriptionMin": "Escriba al menos una frase corta",
+    "shortDescriptionMax": "El resumen del catálogo no puede superar los 200 caracteres",
+    "fullDescriptionMin": "Describa el juego para su ficha",
+    "audienceMax": "El público no puede superar los 160 caracteres",
+    "numberRequired": "Introduzca un número entero",
+    "minPlayers": "Al menos 1 jugador",
+    "maxPlayers": "Al menos 1 jugador",
+    "duration": "Duración estimada en minutos",
+    "maxBelowMin": "El máximo de jugadores debe ser mayor o igual que el mínimo"
+  },
+  "terms": {
+    "title": "Términos y condiciones",
+    "catalogHeading": "Sobre este catálogo",
+    "catalogBody": "Supply es un catálogo de juegos y simulaciones educativas sobre cadenas de suministro. Le ayuda a encontrar un juego y a entender qué enseña. Supply no ejecuta los juegos ni gestiona las partidas. Cada juego que aparece aquí es una aplicación desarrollada y operada de forma independiente, a la que se llega mediante un enlace desde este sitio.",
+    "analyticsHeading": "Analítica de uso anónima",
+    "analyticsP1": "Supply recoge datos anónimos sobre las interacciones con los juegos de este catálogo con el fin de analizar tendencias. Cuando abre un juego desde este sitio, registramos qué juego se seleccionó y la hora en que ocurrió. Estos registros se conservan como totales por hora y por juego.",
+    "analyticsP2": "Estos registros no contienen su nombre, dirección de correo, identificador de cuenta, cookies ni ningún identificador persistente que permita reconocerle a usted o a su dispositivo. No podemos vincular una interacción registrada con una visita concreta, y no lo intentamos.",
+    "analyticsP3": "Para evitar que el tráfico automatizado distorsione estos totales, el servicio conserva brevemente un hash unidireccional de la dirección de red desde la que llegó la petición, agrupado por minuto y descartado en cuestión de minutos. Nunca se guarda junto al registro de qué juego se abrió ni se relaciona con él.",
+    "analyticsP4": "Usamos estos totales únicamente para saber qué juegos despiertan más interés y cuándo, de modo que el catálogo pueda curarse y mejorarse.",
+    "gamesHeading": "Juegos incluidos en este catálogo",
+    "gamesBody": "Seguir el enlace a un juego le lleva a una aplicación distinta que Supply no opera y que se rige por sus propios términos y por su propio tratamiento de la información que usted le facilite. Supply no tiene acceso a los datos que esos juegos recogen o almacenan.",
+    "adminHeading": "Acceso de administradores",
+    "adminBody": "Iniciar sesión con Google está disponible únicamente para los administradores del catálogo y sirve solo para autorizar cambios en el contenido del catálogo. Las visitas no necesitan una cuenta para explorar el catálogo ni para abrir un juego."
+  }
+}

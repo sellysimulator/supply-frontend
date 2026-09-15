@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { Input } from './Input'
 
@@ -12,7 +13,7 @@ export function TagInput({
   onChange,
   id,
   describedBy,
-  placeholder = 'Type and press Enter',
+  placeholder,
 }: {
   value: string[]
   onChange: (next: string[]) => void
@@ -20,6 +21,7 @@ export function TagInput({
   describedBy?: string
   placeholder?: string
 }) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState('')
 
   const commit = () => {
@@ -47,7 +49,7 @@ export function TagInput({
         id={id}
         aria-describedby={describedBy}
         value={draft}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('tagInput.placeholder')}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={onKeyDown}
         onBlur={commit}
@@ -61,7 +63,7 @@ export function TagInput({
                 <button
                   type="button"
                   onClick={() => onChange(value.filter((item) => item !== entry))}
-                  aria-label={`Remove ${entry}`}
+                  aria-label={t('tagInput.remove', { entry })}
                   className="cursor-pointer rounded-sm p-0.5 text-muted-foreground transition-colors duration-200 hover:bg-card hover:text-destructive"
                 >
                   <X size={12} aria-hidden="true" />

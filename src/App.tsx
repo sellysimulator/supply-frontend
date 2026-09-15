@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Layout } from './components/layout/Layout'
 import { RequireAdmin } from './auth/RequireAdmin'
 import Landing from './pages/Landing'
@@ -20,6 +21,8 @@ const GamesList = lazy(() => import('./pages/admin/GamesList'))
 const GameForm = lazy(() => import('./pages/admin/GameForm'))
 
 export default function App() {
+  const { t } = useTranslation()
+
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -35,7 +38,7 @@ export default function App() {
           path="admin"
           element={
             <RequireAdmin>
-              <Suspense fallback={<LoadingSection label="Loading administration" />}>
+              <Suspense fallback={<LoadingSection label={t('admin.loading')} />}>
                 <AdminLayout />
               </Suspense>
             </RequireAdmin>

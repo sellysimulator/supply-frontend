@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ExternalLink, FileText } from 'lucide-react'
 import {
   Badge,
@@ -20,13 +21,14 @@ import { recordGameClick } from '../data/analytics'
 import { useAsync } from '../hooks/useAsync'
 
 export default function GameDetails() {
+  const { t } = useTranslation()
   const { gameId = '' } = useParams<{ gameId: string }>()
   const { data: game, loading, error } = useAsync(() => getGame(gameId), [gameId])
 
   if (loading) {
     return (
       <PageContainer>
-        <LoadingSection label="Loading game" />
+        <LoadingSection label={t('details.loading')} />
       </PageContainer>
     )
   }
@@ -35,11 +37,11 @@ export default function GameDetails() {
     return (
       <PageContainer>
         <ErrorState
-          title="Game not found"
-          description="This game is not available in the catalog. It may have been removed or is not published yet."
+          title={t('details.notFoundTitle')}
+          description={t('details.notFoundDescription')}
           action={
             <ButtonLink to="/catalog" variant="secondary">
-              Back to the catalog
+              {t('details.back')}
             </ButtonLink>
           }
         />
@@ -60,7 +62,7 @@ export default function GameDetails() {
         className="mb-6 inline-flex h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-primary"
       >
         <ArrowLeft size={16} aria-hidden="true" />
-        Back to the catalog
+        {t('details.back')}
       </Link>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -82,7 +84,7 @@ export default function GameDetails() {
           </div>
 
           <section className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold text-foreground">About this game</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t('details.about')}</h2>
             <div className="flex flex-col gap-3 leading-relaxed text-muted-foreground">
               {game.fullDescription.split(/\n{2,}/).map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
@@ -92,7 +94,7 @@ export default function GameDetails() {
 
           {game.learningObjectives.length > 0 && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-lg font-semibold text-foreground">Learning objectives</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t('details.objectives')}</h2>
               <ul className="flex flex-col gap-2">
                 {game.learningObjectives.map((objective) => (
                   <li
@@ -108,7 +110,7 @@ export default function GameDetails() {
 
           {game.screenshots.length > 0 && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-lg font-semibold text-foreground">Screenshots</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t('details.screenshots')}</h2>
               <ScreenshotGallery screenshots={game.screenshots} gameName={game.name} />
             </section>
           )}
@@ -119,19 +121,17 @@ export default function GameDetails() {
             <GameThumbnail game={game} />
             <CardBody className="flex flex-col gap-3">
               <ButtonExternal href={game.launchUrl} onClick={onLaunch} size="lg" className="w-full">
-                Launch game
+                {t('details.launch')}
                 <ExternalLink size={16} aria-hidden="true" />
               </ButtonExternal>
-              <p className="text-xs text-muted-foreground">
-                Opens in a new tab. This game is operated independently of Supply.
-              </p>
+              <p className="text-xs text-muted-foreground">{t('details.launchNote')}</p>
             </CardBody>
           </Card>
 
           {game.resources.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Instructions and resources</CardTitle>
+                <CardTitle>{t('details.resources')}</CardTitle>
               </CardHeader>
               <CardBody>
                 <ul className="flex flex-col gap-2">
@@ -156,7 +156,7 @@ export default function GameDetails() {
           {game.tags.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Tags</CardTitle>
+                <CardTitle>{t('details.tags')}</CardTitle>
               </CardHeader>
               <CardBody>
                 <ul className="flex flex-wrap gap-1.5">

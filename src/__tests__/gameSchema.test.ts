@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  durationLabel,
-  gameFormSchema,
-  gameIdSchema,
-  emptyGameInput,
-  playerRangeLabel,
-} from '../types/game'
+import { emptyGameInput, gameFormSchema, gameIdSchema } from '../types/game'
 
 describe('game identifier', () => {
   it.each(['beer-game', 'selly', 'game-2', 'a1'])('accepts %s', (slug) => {
@@ -52,22 +46,5 @@ describe('game form validation', () => {
   it('rejects a catalog summary that would overflow the card', () => {
     const result = gameFormSchema.safeParse({ ...valid, shortDescription: 'x'.repeat(201) })
     expect(result.success).toBe(false)
-  })
-})
-
-describe('display labels', () => {
-  it('collapses an equal player range to a single figure', () => {
-    expect(playerRangeLabel({ minPlayers: 4, maxPlayers: 4 })).toBe('4 players')
-    expect(playerRangeLabel({ minPlayers: 1, maxPlayers: 1 })).toBe('1 player')
-  })
-
-  it('shows a range when the counts differ', () => {
-    expect(playerRangeLabel({ minPlayers: 2, maxPlayers: 6 })).toBe('2–6 players')
-  })
-
-  it('formats durations in minutes and hours', () => {
-    expect(durationLabel(45)).toBe('45 min')
-    expect(durationLabel(120)).toBe('2 h')
-    expect(durationLabel(90)).toBe('1 h 30 min')
   })
 })

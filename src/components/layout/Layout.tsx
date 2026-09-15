@@ -1,16 +1,19 @@
 import { Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Footer } from './Footer'
 import { Header } from './Header'
 
 /** The public shell: header, page, footer, with a skip link for keyboard users. */
 export function Layout() {
+  const { t } = useTranslation()
+
   return (
     <div className="flex min-h-screen flex-col">
       <a
         href="#main"
         className="sr-only rounded-md bg-primary px-4 py-2 text-on-primary focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
       >
-        Skip to content
+        {t('common.skipToContent')}
       </a>
       <Header />
       <main id="main" className="w-full flex-1">

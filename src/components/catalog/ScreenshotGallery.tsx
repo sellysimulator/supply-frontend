@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../ui'
 import type { StoredImage } from '../../types/game'
 
@@ -10,6 +11,7 @@ export function ScreenshotGallery({
   screenshots: StoredImage[]
   gameName: string
 }) {
+  const { t } = useTranslation()
   const [active, setActive] = useState<StoredImage | null>(null)
 
   if (screenshots.length === 0) return null
@@ -26,7 +28,7 @@ export function ScreenshotGallery({
             >
               <img
                 src={shot.url}
-                alt={`${gameName} screenshot ${index + 1}`}
+                alt={t('game.screenshotAlt', { name: gameName, index: index + 1 })}
                 loading="lazy"
                 className="aspect-video w-full object-cover"
               />
@@ -38,11 +40,15 @@ export function ScreenshotGallery({
       <Modal
         open={active !== null}
         onClose={() => setActive(null)}
-        title={`${gameName} screenshot`}
+        title={t('game.screenshotTitle', { name: gameName })}
         className="max-w-4xl"
       >
         {active && (
-          <img src={active.url} alt={`${gameName} screenshot`} className="w-full rounded-md" />
+          <img
+            src={active.url}
+            alt={t('game.screenshotTitle', { name: gameName })}
+            className="w-full rounded-md"
+          />
         )}
       </Modal>
     </>

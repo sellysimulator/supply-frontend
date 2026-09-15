@@ -156,10 +156,29 @@ Every color lives as a token in `src/index.css`; components reference tokens
 through Tailwind utilities and never hardcode a hex value. UI is composed from
 the primitives in `src/components/ui/` so pages cannot fork the styling.
 
+### Light and dark
+
+The site follows the operating system setting until the reader picks a theme
+from the header, and then remembers the choice. `src/index.css` defines the same
+token names twice — `:root` for light, `.dark` for dark — and `@theme inline`
+maps Tailwind's colors onto them, so a component written as `bg-card
+text-foreground` works in both themes without `dark:` variants. An inline script
+in `index.html` applies the remembered theme before the first paint, so there is
+no flash of the wrong one.
+
+### Languages
+
+The interface is available in English and Spanish, chosen from the header and
+remembered between visits; a first-time visitor gets whichever their browser
+asks for. Every string lives in `src/i18n/locales/en.json` and `es.json`, and a
+unit test fails the build if the two files stop carrying the same keys, so a
+missing translation cannot slip through as a silent fallback to English.
+
 ## Testing
 
 ```bash
-npm test    # 58 unit tests — bucketing, schema, pages, components, data layer
+npm test    # 69 unit tests — bucketing, schema, pages, components, data layer,
+            #   translation key parity, theme switching
 ```
 
 The access rules are not covered by these: they run inside Postgres, so they are

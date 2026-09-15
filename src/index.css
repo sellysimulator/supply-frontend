@@ -8,35 +8,51 @@
    tokens through Tailwind utilities (bg-primary, text-muted-foreground, …) and
    must never hardcode a hex value.
 
+   Both themes define the same set of names, so a component is written once and
+   works in either. The light palette lives on :root and the dark palette on
+   `.dark`, which ThemeProvider puts on <html>; `@theme inline` maps each
+   Tailwind color onto the variable rather than a copy of its value, so the
+   utilities follow whichever palette is active.
+
    See design-system/supply/MASTER.md for the reasoning behind these choices.
    ───────────────────────────────────────────────────────────────────────────── */
-@theme {
+
+/* Dark styling is driven by the class on <html>, never by the media query alone
+   — a reader who chooses a theme must override what their system prefers. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
   /* Brand */
-  --color-primary: #1d4ed8;
-  --color-primary-hover: #1e40af;
-  --color-primary-subtle: #eff6ff;
-  --color-on-primary: #ffffff;
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-on-primary: var(--on-primary);
 
   /* Surfaces */
-  --color-background: #f8fafc;
-  --color-card: #ffffff;
-  --color-muted: #f1f5f9;
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  /* Scrim behind modals. A token of its own because it is neither the page nor
+     the text color, and it has to darken the page in both themes. */
+  --color-overlay: var(--overlay);
 
   /* Text */
-  --color-foreground: #0f172a;
-  --color-muted-foreground: #475569;
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
 
   /* Lines and focus */
-  --color-border: #e2e8f0;
-  --color-ring: #1d4ed8;
+  --color-border: var(--border);
+  --color-ring: var(--ring);
 
   /* Status — used only for state, never as decoration */
-  --color-destructive: #dc2626;
-  --color-destructive-hover: #b91c1c;
-  --color-on-destructive: #ffffff;
-  --color-success: #047857;
-  --color-success-subtle: #ecfdf5;
+  --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-on-destructive: var(--on-destructive);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+}
 
+@theme {
   /* Typography */
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -44,6 +60,62 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
+}
+
+:root {
+  color-scheme: light;
+
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-subtle: #eff6ff;
+  --on-primary: #ffffff;
+
+  --background: #f8fafc;
+  --card: #ffffff;
+  --muted: #f1f5f9;
+  --overlay: rgb(15 23 42 / 0.45);
+
+  --foreground: #0f172a;
+  --muted-foreground: #475569;
+
+  --border: #e2e8f0;
+  --ring: #1d4ed8;
+
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --on-destructive: #ffffff;
+  --success: #047857;
+  --success-subtle: #ecfdf5;
+}
+
+/* The dark palette keeps the same single blue and the same flat treatment. The
+   blue lightens, because a mid-blue that is legible on white is not legible on
+   a dark surface, and `on-primary` darkens to keep filled controls above the
+   4.5:1 contrast the design system requires. */
+.dark {
+  color-scheme: dark;
+
+  --primary: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-subtle: #172554;
+  --on-primary: #0b1220;
+
+  --background: #0b1220;
+  --card: #111a2c;
+  --muted: #1c2740;
+  --overlay: rgb(2 6 23 / 0.7);
+
+  --foreground: #e8eefc;
+  --muted-foreground: #9fb0cc;
+
+  --border: #24304a;
+  --ring: #60a5fa;
+
+  --destructive: #f87171;
+  --destructive-hover: #fca5a5;
+  --on-destructive: #1a0a0a;
+  --success: #34d399;
+  --success-subtle: #052e24;
 }
 
 @layer base {

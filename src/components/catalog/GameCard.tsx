@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
 import { Badge, Card } from '../ui'
 import type { Game } from '../../types/game'
@@ -8,6 +9,8 @@ import { GameThumbnail } from './GameThumbnail'
 /** One catalog entry in the grid. The whole card is not a link — the
  *  "More details" action is, so the card's text stays selectable. */
 export function GameCard({ game }: { game: Game }) {
+  const { t } = useTranslation()
+
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-colors duration-200 hover:border-primary">
       <GameThumbnail game={game} />
@@ -30,10 +33,10 @@ export function GameCard({ game }: { game: Game }) {
 
         <Link
           to={`/games/${game.id}`}
-          aria-label={`More details about ${game.name}`}
+          aria-label={t('game.moreDetailsAbout', { name: game.name })}
           className="mt-1 inline-flex h-11 w-fit items-center gap-1.5 rounded-md text-sm font-medium text-primary transition-colors duration-200 hover:text-primary-hover"
         >
-          More details
+          {t('game.moreDetails')}
           <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Controller, useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Save } from 'lucide-react'
@@ -34,6 +35,7 @@ function slugify(name: string): string {
 }
 
 export default function GameForm() {
+  const { t } = useTranslation()
   const { gameId } = useParams<{ gameId: string }>()
   const isEditing = Boolean(gameId)
   const navigate = useNavigate()
@@ -49,8 +51,13 @@ export default function GameForm() {
      changing it would orphan the analytics counters keyed on it. */
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
-  const [slugError, setSlugError] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  /* Validation failures are held as translation keys and resolved when they are
+     rendered, so switching language re-renders the message rather than leaving
+     the previous language's sentence on screen. */
+  const [slugErrorKey, setSlugErrorKey] = useState<string | null>(null)
+  const [saveFailed, setSaveFailed] = useState(false)
+
+  const message = (key?: string) => (key ? t(key) : undefined)
 
   const {
     register,
@@ -80,17 +87,17 @@ export default function GameForm() {
   const effectiveId = useMemo(() => (isEditing ? (gameId ?? '') : slug), [isEditing, gameId, slug])
 
   const onSubmit = handleSubmit(async (values) => {
-    setSaveError(null)
-    setSlugError(null)
+    setSaveFailed(false)
+    setSlugErrorKey(null)
 
     if (!isEditing) {
       const parsed = gameIdSchema.safeParse(slug)
       if (!parsed.success) {
-        setSlugError(parsed.error.issues[0]?.message ?? 'Invalid identifier')
+        setSlugErrorKey(parsed.error.issues[0]?.message ?? 'validation.identifierFormat')
         return
       }
       if (await gameIdExists(slug)) {
-        setSlugError('A game with this identifier already exists')
+        setSlugErrorKey('admin.form.identifierTaken')
         return
       }
     }
@@ -103,22 +110,20 @@ export default function GameForm() {
       }
       navigate('/admin/games')
     } catch {
-      setSaveError(
-        'Saving failed. Check that you are still signed in as an administrator and try again.',
-      )
+      setSaveFailed(true)
     }
   })
 
-  if (isEditing && loading) return <LoadingSection label="Loading game" />
+  if (isEditing && loading) return <LoadingSection label={t('admin.form.loading')} />
 
   if (isEditing && (error || !existing)) {
     return (
       <ErrorState
-        title="Game not found"
-        description="This catalog entry could not be loaded."
+        title={t('admin.form.notFoundTitle')}
+        description={t('admin.form.notFoundDescription')}
         action={
           <Button variant="secondary" onClick={() => navigate('/admin/games')}>
-            Back to games
+            {t('admin.form.back')}
           </Button>
         }
       />
@@ -135,44 +140,42 @@ export default function GameForm() {
             className="inline-flex w-fit cursor-pointer items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
           >
             <ArrowLeft size={15} aria-hidden="true" />
-            Back to games
+            {t('admin.form.back')}
           </button>
           <h2 className="text-lg font-semibold text-foreground">
-            {isEditing ? `Edit ${existing?.name}` : 'Add a game'}
+            {isEditing ? t('admin.form.edit', { name: existing?.name ?? '' }) : t('admin.form.add')}
           </h2>
         </div>
         <Button type="submit" disabled={isSubmitting} className="w-fit">
           <Save size={16} aria-hidden="true" />
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create game'}
+          {isSubmitting
+            ? t('admin.form.saving')
+            : t(isEditing ? 'admin.form.saveChanges' : 'admin.form.create')}
         </Button>
       </div>
 
-      {saveError && (
+      {saveFailed && (
         <p role="alert" className="text-sm font-medium text-destructive">
-          {saveError}
+          {t('admin.form.saveFailed')}
         </p>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Identity</CardTitle>
+          <CardTitle>{t('admin.form.identitySection')}</CardTitle>
         </CardHeader>
         <CardBody className="flex flex-col gap-5">
-          <Field label="Name" required error={errors.name?.message}>
+          <Field label={t('admin.form.name')} required error={message(errors.name?.message)}>
             {({ id, describedBy }) => (
               <Input id={id} aria-describedby={describedBy} {...register('name')} />
             )}
           </Field>
 
           <Field
-            label="Identifier"
+            label={t('admin.form.identifier')}
             required
-            hint={
-              isEditing
-                ? 'The identifier cannot be changed — analytics are recorded against it.'
-                : 'Used in the address of the game page, for example /games/beer-game.'
-            }
-            error={slugError ?? undefined}
+            hint={t(isEditing ? 'admin.form.identifierLockedHint' : 'admin.form.identifierHint')}
+            error={message(slugErrorKey ?? undefined)}
           >
             {({ id, describedBy }) => (
               <Input
@@ -190,10 +193,10 @@ export default function GameForm() {
           </Field>
 
           <Field
-            label="Catalog summary"
+            label={t('admin.form.shortDescription')}
             required
-            hint="One sentence shown on the catalog card."
-            error={errors.shortDescription?.message}
+            hint={t('admin.form.shortDescriptionHint')}
+            error={message(errors.shortDescription?.message)}
           >
             {({ id, describedBy }) => (
               <Input
@@ -206,10 +209,10 @@ export default function GameForm() {
           </Field>
 
           <Field
-            label="Full description"
+            label={t('admin.form.fullDescription')}
             required
-            hint="Shown on the game's details page. Leave a blank line between paragraphs."
-            error={errors.fullDescription?.message}
+            hint={t('admin.form.fullDescriptionHint')}
+            error={message(errors.fullDescription?.message)}
           >
             {({ id, describedBy }) => (
               <Textarea
@@ -225,11 +228,15 @@ export default function GameForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Session details</CardTitle>
+          <CardTitle>{t('admin.form.sessionSection')}</CardTitle>
         </CardHeader>
         <CardBody className="flex flex-col gap-5">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <Field label="Minimum players" required error={errors.minPlayers?.message}>
+            <Field
+              label={t('admin.form.minPlayers')}
+              required
+              error={message(errors.minPlayers?.message)}
+            >
               {({ id, describedBy }) => (
                 <Input
                   id={id}
@@ -240,7 +247,11 @@ export default function GameForm() {
                 />
               )}
             </Field>
-            <Field label="Maximum players" required error={errors.maxPlayers?.message}>
+            <Field
+              label={t('admin.form.maxPlayers')}
+              required
+              error={message(errors.maxPlayers?.message)}
+            >
               {({ id, describedBy }) => (
                 <Input
                   id={id}
@@ -251,7 +262,11 @@ export default function GameForm() {
                 />
               )}
             </Field>
-            <Field label="Duration (minutes)" required error={errors.durationMinutes?.message}>
+            <Field
+              label={t('admin.form.duration')}
+              required
+              error={message(errors.durationMinutes?.message)}
+            >
               {({ id, describedBy }) => (
                 <Input
                   id={id}
@@ -264,13 +279,13 @@ export default function GameForm() {
             </Field>
           </div>
 
-          <Field label="Intended audience" hint="For example: undergraduate operations students.">
+          <Field label={t('admin.form.audience')} hint={t('admin.form.audienceHint')}>
             {({ id, describedBy }) => (
               <Input id={id} aria-describedby={describedBy} {...register('audience')} />
             )}
           </Field>
 
-          <Field label="Learning objectives" hint="One per entry. Press Enter to add.">
+          <Field label={t('admin.form.objectives')} hint={t('admin.form.objectivesHint')}>
             {({ id, describedBy }) => (
               <Controller
                 control={control}
@@ -281,7 +296,7 @@ export default function GameForm() {
                     describedBy={describedBy}
                     value={field.value ?? []}
                     onChange={field.onChange}
-                    placeholder="Understand the bullwhip effect"
+                    placeholder={t('admin.form.objectivesPlaceholder')}
                   />
                 )}
               />
@@ -289,7 +304,7 @@ export default function GameForm() {
           </Field>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Field label="Categories" hint="Used by the catalog filter.">
+            <Field label={t('admin.form.categories')} hint={t('admin.form.categoriesHint')}>
               {({ id, describedBy }) => (
                 <Controller
                   control={control}
@@ -300,13 +315,13 @@ export default function GameForm() {
                       describedBy={describedBy}
                       value={field.value ?? []}
                       onChange={field.onChange}
-                      placeholder="Simulation"
+                      placeholder={t('admin.form.categoriesPlaceholder')}
                     />
                   )}
                 />
               )}
             </Field>
-            <Field label="Tags">
+            <Field label={t('admin.form.tags')}>
               {({ id, describedBy }) => (
                 <Controller
                   control={control}
@@ -317,7 +332,7 @@ export default function GameForm() {
                       describedBy={describedBy}
                       value={field.value ?? []}
                       onChange={field.onChange}
-                      placeholder="bullwhip"
+                      placeholder={t('admin.form.tagsPlaceholder')}
                     />
                   )}
                 />
@@ -329,17 +344,17 @@ export default function GameForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Media</CardTitle>
+          <CardTitle>{t('admin.form.mediaSection')}</CardTitle>
         </CardHeader>
         <CardBody className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-foreground">Thumbnail</p>
+            <p className="text-sm font-medium text-foreground">{t('admin.form.thumbnail')}</p>
             <Controller
               control={control}
               name="thumbnail"
               render={({ field }) => (
                 <ImageUploader
-                  label="Thumbnail"
+                  label={t('admin.form.thumbnail')}
                   gameId={effectiveId}
                   images={field.value ? [field.value] : []}
                   onChange={(next) => field.onChange(next[0] ?? null)}
@@ -349,13 +364,13 @@ export default function GameForm() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-foreground">Screenshots</p>
+            <p className="text-sm font-medium text-foreground">{t('admin.form.screenshots')}</p>
             <Controller
               control={control}
               name="screenshots"
               render={({ field }) => (
                 <ImageUploader
-                  label="Screenshots"
+                  label={t('admin.form.screenshots')}
                   gameId={effectiveId}
                   images={field.value ?? []}
                   onChange={field.onChange}
@@ -369,27 +384,27 @@ export default function GameForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Links and publication</CardTitle>
+          <CardTitle>{t('admin.form.linksSection')}</CardTitle>
         </CardHeader>
         <CardBody className="flex flex-col gap-5">
           <Field
-            label="Launch URL"
+            label={t('admin.form.launchUrl')}
             required
-            hint="Where the game runs. Must start with https://."
-            error={errors.launchUrl?.message}
+            hint={t('admin.form.launchUrlHint')}
+            error={message(errors.launchUrl?.message)}
           >
             {({ id, describedBy }) => (
               <Input
                 id={id}
                 aria-describedby={describedBy}
-                placeholder="https://example.com/game"
+                placeholder={t('admin.form.launchUrlPlaceholder')}
                 {...register('launchUrl')}
               />
             )}
           </Field>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-foreground">Instructions and resources</p>
+            <p className="text-sm font-medium text-foreground">{t('admin.form.resources')}</p>
             <Controller
               control={control}
               name="resources"
@@ -399,7 +414,7 @@ export default function GameForm() {
             />
           </div>
 
-          <Field label="Sort order" hint="Lower numbers appear first in the catalog.">
+          <Field label={t('admin.form.sortOrder')} hint={t('admin.form.sortOrderHint')}>
             {({ id, describedBy }) => (
               <Input
                 id={id}
@@ -418,10 +433,10 @@ export default function GameForm() {
               className="mt-1 h-4 w-4 cursor-pointer accent-primary"
             />
             <span className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-foreground">Published</span>
-              <span className="text-xs text-muted-foreground">
-                Published games are visible to everyone in the public catalog.
+              <span className="text-sm font-medium text-foreground">
+                {t('admin.form.published')}
               </span>
+              <span className="text-xs text-muted-foreground">{t('admin.form.publishedHint')}</span>
             </span>
           </label>
         </CardBody>
@@ -429,11 +444,13 @@ export default function GameForm() {
 
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={() => navigate('/admin/games')}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           <Save size={16} aria-hidden="true" />
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create game'}
+          {isSubmitting
+            ? t('admin.form.saving')
+            : t(isEditing ? 'admin.form.saveChanges' : 'admin.form.create')}
         </Button>
       </div>
     </form>

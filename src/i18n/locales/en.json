@@ -1,0 +1,325 @@
+{
+  "common": {
+    "loading": "Loading",
+    "tryAgain": "Try again",
+    "cancel": "Cancel",
+    "close": "Close",
+    "closeDialog": "Close dialog",
+    "somethingWentWrong": "Something went wrong",
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "main": "Main",
+    "home": "Home",
+    "catalog": "Catalog",
+    "about": "About",
+    "admin": "Admin",
+    "homeAria": "Supply — home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "theme": {
+    "toDark": "Switch to dark theme",
+    "toLight": "Switch to light theme"
+  },
+  "language": {
+    "switchLabel": "ES",
+    "switchAria": "Cambiar a español"
+  },
+  "footer": {
+    "label": "Footer",
+    "tagline": "A catalog of educational supply chain games and simulations.",
+    "terms": "Terms and Conditions"
+  },
+  "landing": {
+    "eyebrow": "Supply chain education",
+    "title": "A curated catalog of supply chain games and simulations",
+    "intro": "Supply brings together educational games — from the classic Beer Game to newer simulations — so instructors and learners can find the right one, understand what it teaches, and start playing.",
+    "browseCatalog": "Browse the catalog",
+    "aboutSupply": "About Supply",
+    "whatSupplyDoes": "What Supply does",
+    "values": {
+      "find": {
+        "title": "Find the right game",
+        "body": "Browse simulations by category, audience, group size and session length to match the game to your class or workshop."
+      },
+      "teach": {
+        "title": "Know what it teaches",
+        "body": "Every entry sets out its learning objectives, intended audience and supporting material before you commit a session to it."
+      },
+      "launch": {
+        "title": "Launch it directly",
+        "body": "Each game runs as its own independent application. Supply links you straight to it — there is nothing to install here."
+      }
+    },
+    "featured": {
+      "title": "Games in the catalog",
+      "description": "A selection of what is available right now.",
+      "viewAll": "View all",
+      "loading": "Loading games",
+      "empty": "No games have been published yet. Please check back soon."
+    }
+  },
+  "about": {
+    "title": "About Supply",
+    "description": "Why this catalog exists and what it is — and is not — responsible for.",
+    "p1": "Games and simulations are among the most effective ways to teach how supply chains behave. The Beer Game has shown for decades that a lesson about delay, information loss and the bullwhip effect lands far harder when people live through it than when they read about it.",
+    "p2": "The difficulty is finding them. Educational simulations are scattered across university pages, research projects and independent developers, usually described in terms that make it hard to tell how many players are needed, how long a session runs, or what a group is actually meant to learn. Choosing one often means running it first.",
+    "p3": "Supply exists to close that gap. It is a single place to discover supply chain games, read a consistent description of each, and open the one that fits. Every entry records the same facts in the same form — objectives, audience, group size, duration, supporting material — so two games can be compared without guesswork.",
+    "p4": "The catalog is deliberately narrow in scope. It does not host the games, keep scores, manage sessions or collect anything about the people who play them. It describes and it links; the games themselves do the rest.",
+    "boundaries": {
+      "catalog": {
+        "title": "Supply is a catalog",
+        "body": "Supply holds the description of each game — what it teaches, who it is for, how long it takes — along with a link to where it runs. That is the whole of its job."
+      },
+      "independent": {
+        "title": "The games are independent",
+        "body": "Every game in the catalog is built, deployed and maintained on its own, with its own interface, its own data and its own release schedule. Supply does not run them or store anything they produce."
+      },
+      "curated": {
+        "title": "Curated, not automated",
+        "body": "Entries are written and reviewed by the people who maintain the catalog, so the description you read does not depend on the game being online at that moment."
+      }
+    },
+    "cta": {
+      "title": "Start with the catalog",
+      "body": "Browse everything currently published, filter by category, and open a game's details to see what a session involves.",
+      "action": "Browse the catalog"
+    }
+  },
+  "catalog": {
+    "title": "Catalog",
+    "description": "Browse the games and simulations available in Supply. Open a game's details to see what it teaches and how to run it.",
+    "loading": "Loading the catalog",
+    "loadError": "The catalog could not be loaded. Check your connection and try again.",
+    "filterLabel": "Filter by category",
+    "all": "All",
+    "count_one": "{{count}} game",
+    "count_other": "{{count}} games",
+    "countInCategory_one": "{{count}} game in {{category}}",
+    "countInCategory_other": "{{count}} games in {{category}}",
+    "emptyCategory": {
+      "title": "No games in this category",
+      "description": "Try another category, or view all games.",
+      "action": "View all games"
+    },
+    "empty": {
+      "title": "The catalog is empty",
+      "description": "Games will appear here once they have been published."
+    }
+  },
+  "game": {
+    "moreDetails": "More details",
+    "moreDetailsAbout": "More details about {{name}}",
+    "thumbnailAlt": "{{name}} thumbnail",
+    "screenshotAlt": "{{name}} screenshot {{index}}",
+    "screenshotTitle": "{{name}} screenshot",
+    "players_one": "{{count}} player",
+    "players_other": "{{count}} players",
+    "playerRange": "{{min}}–{{max}} players",
+    "durationMinutes": "{{count}} min",
+    "durationHours": "{{count}} h",
+    "durationHoursMinutes": "{{hours}} h {{minutes}} min"
+  },
+  "details": {
+    "loading": "Loading game",
+    "back": "Back to the catalog",
+    "notFoundTitle": "Game not found",
+    "notFoundDescription": "This game is not available in the catalog. It may have been removed or is not published yet.",
+    "about": "About this game",
+    "objectives": "Learning objectives",
+    "screenshots": "Screenshots",
+    "launch": "Launch game",
+    "launchNote": "Opens in a new tab. This game is operated independently of Supply.",
+    "resources": "Instructions and resources",
+    "tags": "Tags"
+  },
+  "notFound": {
+    "eyebrow": "Error 404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist, or has been moved.",
+    "home": "Return home"
+  },
+  "signIn": {
+    "checking": "Checking your access",
+    "title": "Administrator sign-in",
+    "description": "This area is for catalog administrators. You do not need an account to browse the catalog or open a game.",
+    "continueWithGoogle": "Continue with Google",
+    "redirecting": "Redirecting…",
+    "failed": "Sign-in failed. Please try again.",
+    "notAdminTitle": "This account is not an administrator",
+    "notAdminBody": "You are signed in as <0>{{email}}</0>, but this account has no administrator record.",
+    "grantAccess": "To grant access",
+    "grantAccessBody": "In the Supabase SQL editor, run <0></0> with the user id below, then reload this page.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "signOut": "Sign out"
+  },
+  "admin": {
+    "title": "Administration",
+    "signedInAs": "Signed in as {{email}}",
+    "signOut": "Sign out",
+    "navLabel": "Administration",
+    "analytics": "Analytics",
+    "games": "Games",
+    "loading": "Loading administration",
+    "dashboard": {
+      "title": "Analytics",
+      "description": "Anonymous game launches recorded over the last 30 days. No visitor information is stored — only which game was opened and in which hour.",
+      "loading": "Loading analytics",
+      "loadError": "The analytics could not be loaded.",
+      "launches30d": "Launches (30 days)",
+      "launches24h": "Launches (24 hours)",
+      "mostLaunched": "Most launched",
+      "launchCount_one": "{{count}} launch",
+      "launchCount_other": "{{count}} launches",
+      "noLaunchesYet": "No launches recorded yet",
+      "publishedGames": "Published games",
+      "entryCount_one": "{{count}} entry in total",
+      "entryCount_other": "{{count}} entries in total",
+      "hourlyTitle": "Launches per hour, last 48 hours",
+      "hourlyEmpty": "No launches have been recorded yet.",
+      "perGameTitle": "Launches per game, last 30 days",
+      "perGameEmptyTitle": "Nothing to report yet",
+      "perGameEmptyDescription": "Game launches will appear here once visitors start opening games from the catalog."
+    },
+    "chart": {
+      "hourlyAlt": "Game launches per hour over the last {{hours}} hours. {{total}} launches in total, peaking at {{peak}}.",
+      "showTable": "Show data table",
+      "hideTable": "Hide data table",
+      "tableCaption": "Game launches per hour",
+      "hour": "Hour",
+      "launches": "Launches"
+    },
+    "gamesList": {
+      "title": "Games",
+      "description": "Catalog entries. Only published games are visible to visitors.",
+      "add": "Add game",
+      "loading": "Loading games",
+      "loadError": "The catalog could not be loaded.",
+      "emptyTitle": "No games yet",
+      "emptyDescription": "Add the first catalog entry to get started.",
+      "columnGame": "Game",
+      "columnIdentifier": "Identifier",
+      "columnStatus": "Status",
+      "columnActions": "Actions",
+      "published": "Published",
+      "draft": "Draft",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "publishGame": "Publish {{name}}",
+      "unpublishGame": "Unpublish {{name}}",
+      "editGame": "Edit {{name}}",
+      "deleteGame": "Delete {{name}}",
+      "publishFailed": "Could not publish {{name}}.",
+      "unpublishFailed": "Could not unpublish {{name}}.",
+      "deleteFailed": "Could not delete {{name}}.",
+      "deleteTitle": "Delete this game?",
+      "deleteBody": "<0>{{name}}</0> will be removed from the catalog along with its uploaded images. This cannot be undone.",
+      "deleteNote": "Recorded launch counts are kept, so historical analytics stay intact.",
+      "deleting": "Deleting…",
+      "confirmDelete": "Delete game"
+    },
+    "form": {
+      "loading": "Loading game",
+      "notFoundTitle": "Game not found",
+      "notFoundDescription": "This catalog entry could not be loaded.",
+      "back": "Back to games",
+      "edit": "Edit {{name}}",
+      "add": "Add a game",
+      "saving": "Saving…",
+      "saveChanges": "Save changes",
+      "create": "Create game",
+      "saveFailed": "Saving failed. Check that you are still signed in as an administrator and try again.",
+      "identitySection": "Identity",
+      "name": "Name",
+      "identifier": "Identifier",
+      "identifierLockedHint": "The identifier cannot be changed — analytics are recorded against it.",
+      "identifierHint": "Used in the address of the game page, for example /games/beer-game.",
+      "identifierTaken": "A game with this identifier already exists",
+      "shortDescription": "Catalog summary",
+      "shortDescriptionHint": "One sentence shown on the catalog card.",
+      "fullDescription": "Full description",
+      "fullDescriptionHint": "Shown on the game's details page. Leave a blank line between paragraphs.",
+      "sessionSection": "Session details",
+      "minPlayers": "Minimum players",
+      "maxPlayers": "Maximum players",
+      "duration": "Duration (minutes)",
+      "audience": "Intended audience",
+      "audienceHint": "For example: undergraduate operations students.",
+      "objectives": "Learning objectives",
+      "objectivesHint": "One per entry. Press Enter to add.",
+      "objectivesPlaceholder": "Understand the bullwhip effect",
+      "categories": "Categories",
+      "categoriesHint": "Used by the catalog filter.",
+      "categoriesPlaceholder": "Simulation",
+      "tags": "Tags",
+      "tagsPlaceholder": "bullwhip",
+      "mediaSection": "Media",
+      "thumbnail": "Thumbnail",
+      "screenshots": "Screenshots",
+      "linksSection": "Links and publication",
+      "launchUrl": "Launch URL",
+      "launchUrlHint": "Where the game runs. Must start with https://.",
+      "launchUrlPlaceholder": "https://example.com/game",
+      "resources": "Instructions and resources",
+      "sortOrder": "Sort order",
+      "sortOrderHint": "Lower numbers appear first in the catalog.",
+      "published": "Published",
+      "publishedHint": "Published games are visible to everyone in the public catalog."
+    },
+    "images": {
+      "addImages": "Add images",
+      "chooseImage": "Choose image",
+      "uploading": "Uploading…",
+      "uploadFailed": "Upload failed. Check that you are signed in as an administrator.",
+      "identifierFirst": "Enter the identifier first — it decides where the file is stored.",
+      "remove": "Remove image"
+    },
+    "resources": {
+      "labelField": "Resource {{index}} label",
+      "urlField": "Resource {{index}} URL",
+      "labelPlaceholder": "Facilitator guide",
+      "urlPlaceholder": "https://example.com/guide.pdf",
+      "remove": "Remove resource {{index}}",
+      "add": "Add resource"
+    }
+  },
+  "tagInput": {
+    "placeholder": "Type and press Enter",
+    "remove": "Remove {{entry}}"
+  },
+  "validation": {
+    "identifierMin": "Identifier must be at least 2 characters",
+    "identifierMax": "Identifier must be 60 characters or fewer",
+    "identifierFormat": "Use lowercase letters, numbers and single hyphens (for example: beer-game)",
+    "urlFull": "Enter a full URL",
+    "urlHttps": "URL must start with https://",
+    "resourceLabel": "Give the resource a label",
+    "nameRequired": "Name is required",
+    "nameMax": "Keep the name under 120 characters",
+    "shortDescriptionMin": "Write at least a short sentence",
+    "shortDescriptionMax": "Keep the catalog summary under 200 characters",
+    "fullDescriptionMin": "Describe the game for its details page",
+    "audienceMax": "Keep the audience under 160 characters",
+    "numberRequired": "Enter a whole number",
+    "minPlayers": "At least 1 player",
+    "maxPlayers": "At least 1 player",
+    "duration": "Estimated duration in minutes",
+    "maxBelowMin": "Maximum players must be greater than or equal to minimum"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "catalogHeading": "About this catalog",
+    "catalogBody": "Supply is a catalog of educational games and simulations about supply chains. It helps you find a game and understand what it teaches. Supply does not run the games or manage gameplay. Each game listed here is an independently developed and operated application, reached through a link from this site.",
+    "analyticsHeading": "Anonymous usage analytics",
+    "analyticsP1": "Supply collects anonymous data about interactions with the games in this catalog for the purpose of trend analysis. When you open a game from this site, we record which game was selected and the hour in which it happened. These records are kept as hourly totals per game.",
+    "analyticsP2": "These records do not contain your name, email address, account identifier, cookies, or any persistent identifier that could be used to recognise you or your device. We cannot link a recorded interaction back to an individual visitor, and we do not attempt to.",
+    "analyticsP3": "To stop automated traffic from distorting these totals, the service briefly keeps a one-way hash of the network address a request came from, grouped by minute and discarded within minutes. It is never stored alongside, or connected to, the record of which game was opened.",
+    "analyticsP4": "We use these totals only to understand which games attract the most interest and when that interest occurs, so the catalog can be curated and improved.",
+    "gamesHeading": "Games listed in this catalog",
+    "gamesBody": "Following a link to a game takes you to a separate application that is not operated by Supply and is governed by its own terms and its own handling of any information you provide to it. Supply has no access to the data those games collect or store.",
+    "adminHeading": "Administrator sign-in",
+    "adminBody": "Signing in with Google is available only to catalog administrators and is used solely to authorise changes to catalog content. Visitors do not need an account to browse the catalog or to open a game."
+  }
+}

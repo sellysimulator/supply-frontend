@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
 import { Check, Copy, LogIn } from 'lucide-react'
 import { Button, Card, CardBody, CardHeader, CardTitle, LoadingSection } from '../components/ui'
 import { PageContainer } from '../components/layout/Layout'
@@ -14,6 +15,7 @@ import { useAuth } from '../auth/useAuth'
  * id is not knowable before the first sign-in.
  */
 export default function SignIn() {
+  const { t } = useTranslation()
   const { user, loading, isAdmin, checkingRole, signIn, signOut } = useAuth()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +27,7 @@ export default function SignIn() {
   if (loading || checkingRole) {
     return (
       <PageContainer>
-        <LoadingSection label="Checking your access" />
+        <LoadingSection label={t('signIn.checking')} />
       </PageContainer>
     )
   }
@@ -40,7 +42,7 @@ export default function SignIn() {
     try {
       await signIn()
     } catch {
-      setError('Sign-in failed. Please try again.')
+      setError(t('signIn.failed'))
       setBusy(false)
     }
   }
@@ -57,12 +59,9 @@ export default function SignIn() {
       <div className="mx-auto flex w-full max-w-lg flex-col gap-6 py-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Administrator sign-in
+            {t('signIn.title')}
           </h1>
-          <p className="text-muted-foreground">
-            This area is for catalog administrators. You do not need an account to browse the
-            catalog or open a game.
-          </p>
+          <p className="text-muted-foreground">{t('signIn.description')}</p>
         </div>
 
         {!user && (
@@ -70,7 +69,7 @@ export default function SignIn() {
             <CardBody className="flex flex-col gap-4">
               <Button onClick={onSignIn} disabled={busy} size="lg" className="w-full">
                 <LogIn size={16} aria-hidden="true" />
-                {busy ? 'Redirecting…' : 'Continue with Google'}
+                {busy ? t('signIn.redirecting') : t('signIn.continueWithGoogle')}
               </Button>
               {error && (
                 <p role="alert" className="text-sm font-medium text-destructive">
@@ -84,21 +83,27 @@ export default function SignIn() {
         {user && !isAdmin && (
           <Card>
             <CardHeader>
-              <CardTitle>This account is not an administrator</CardTitle>
+              <CardTitle>{t('signIn.notAdminTitle')}</CardTitle>
             </CardHeader>
             <CardBody className="flex flex-col gap-4 text-sm text-muted-foreground">
               <p>
-                You are signed in as <span className="text-foreground">{user.email}</span>, but this
-                account has no administrator record.
+                <Trans
+                  i18nKey="signIn.notAdminBody"
+                  values={{ email: user.email }}
+                  components={[<span key="email" className="text-foreground" />]}
+                />
               </p>
               <div className="flex flex-col gap-2">
-                <p className="font-medium text-foreground">To grant access</p>
+                <p className="font-medium text-foreground">{t('signIn.grantAccess')}</p>
                 <p>
-                  In the Supabase SQL editor, run{' '}
-                  <code className="rounded-sm bg-muted px-1 py-0.5 text-foreground">
-                    insert into admins (user_id, email) values (&apos;…&apos;, &apos;…&apos;);
-                  </code>{' '}
-                  with the user id below, then reload this page.
+                  <Trans
+                    i18nKey="signIn.grantAccessBody"
+                    components={[
+                      <code key="sql" className="rounded-sm bg-muted px-1 py-0.5 text-foreground">
+                        insert into admins (user_id, email) values (&apos;…&apos;, &apos;…&apos;);
+                      </code>,
+                    ]}
+                  />
                 </p>
               </div>
 
@@ -108,12 +113,12 @@ export default function SignIn() {
                   {copied ? (
                     <>
                       <Check size={14} aria-hidden="true" />
-                      Copied
+                      {t('signIn.copied')}
                     </>
                   ) : (
                     <>
                       <Copy size={14} aria-hidden="true" />
-                      Copy
+                      {t('signIn.copy')}
                     </>
                   )}
                 </Button>
@@ -121,7 +126,7 @@ export default function SignIn() {
 
               <div>
                 <Button variant="ghost" onClick={() => void signOut()}>
-                  Sign out
+                  {t('signIn.signOut')}
                 </Button>
               </div>
             </CardBody>

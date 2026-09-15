@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, EmptyState, ErrorState, LoadingSection } from '../components/ui'
 import { PageContainer, PageHeading } from '../components/layout/Layout'
 import { CategoryFilter } from '../components/catalog/CategoryFilter'
@@ -7,6 +8,7 @@ import { listPublishedGames } from '../data/games'
 import { useAsync } from '../hooks/useAsync'
 
 export default function Catalog() {
+  const { t } = useTranslation()
   const { data: games, loading, error, reload } = useAsync(() => listPublishedGames(), [])
   const [category, setCategory] = useState<string | null>(null)
 
@@ -25,19 +27,16 @@ export default function Catalog() {
 
   return (
     <PageContainer>
-      <PageHeading
-        title="Catalog"
-        description="Browse the games and simulations available in Supply. Open a game's details to see what it teaches and how to run it."
-      />
+      <PageHeading title={t('catalog.title')} description={t('catalog.description')} />
 
-      {loading && <LoadingSection label="Loading the catalog" />}
+      {loading && <LoadingSection label={t('catalog.loading')} />}
 
       {error && (
         <ErrorState
-          description="The catalog could not be loaded. Check your connection and try again."
+          description={t('catalog.loadError')}
           action={
             <Button variant="secondary" onClick={reload}>
-              Try again
+              {t('common.tryAgain')}
             </Button>
           }
         />
@@ -49,16 +48,14 @@ export default function Catalog() {
 
           {visible.length === 0 ? (
             <EmptyState
-              title={category ? 'No games in this category' : 'The catalog is empty'}
-              description={
-                category
-                  ? 'Try another category, or view all games.'
-                  : 'Games will appear here once they have been published.'
-              }
+              title={t(category ? 'catalog.emptyCategory.title' : 'catalog.empty.title')}
+              description={t(
+                category ? 'catalog.emptyCategory.description' : 'catalog.empty.description',
+              )}
               action={
                 category ? (
                   <Button variant="secondary" onClick={() => setCategory(null)}>
-                    View all games
+                    {t('catalog.emptyCategory.action')}
                   </Button>
                 ) : undefined
               }
@@ -66,8 +63,9 @@ export default function Catalog() {
           ) : (
             <>
               <p className="text-sm text-muted-foreground" aria-live="polite">
-                {visible.length} {visible.length === 1 ? 'game' : 'games'}
-                {category ? ` in ${category}` : ''}
+                {category
+                  ? t('catalog.countInCategory', { count: visible.length, category })
+                  : t('catalog.count', { count: visible.length })}
               </p>
               <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((game) => (

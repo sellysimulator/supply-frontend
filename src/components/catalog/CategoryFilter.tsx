@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { cn } from '../../lib/cn'
 
 /**
@@ -13,15 +14,21 @@ export function CategoryFilter({
   selected: string | null
   onSelect: (category: string | null) => void
 }) {
+  const { t } = useTranslation()
+
   if (categories.length === 0) return null
 
   const options: { key: string; label: string; value: string | null }[] = [
-    { key: '__all__', label: 'All', value: null },
+    { key: '__all__', label: t('catalog.all'), value: null },
     ...categories.map((category) => ({ key: category, label: category, value: category })),
   ]
 
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">
+    <div
+      className="flex flex-wrap items-center gap-2"
+      role="group"
+      aria-label={t('catalog.filterLabel')}
+    >
       {options.map((option) => {
         const isActive = selected === option.value
         return (
