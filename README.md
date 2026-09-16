@@ -1,12 +1,12 @@
-# Supply
+# Selly
 
 A web-based catalog for educational games and simulations about supply chains,
-including the Beer Game and its relatives. Supply helps people discover a game,
+including the Beer Game and its relatives. Selly helps people discover a game,
 understand what it teaches, and open it.
 
-**Supply does not run the games.** Each game listed here is an independently
+**Selly does not run the games.** Each game listed here is an independently
 developed and deployed application with its own frontend, backend, data and
-release cycle. Supply stores only the catalog metadata and the launch URL.
+release cycle. Selly stores only the catalog metadata and the launch URL.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ A static React bundle talking directly to Supabase from the browser. There is no
 application server.
 
 ```
-Supply
+Selly
 ├── React frontend on Firebase Hosting
 ├── Supabase Auth (Google, administrators only)
 ├── Postgres — catalog entries
@@ -133,6 +133,14 @@ anything about the caller.
 Counters have no foreign key to `games`, so deleting a game never rewrites
 history.
 
+Administrators never read these rows directly. `click_totals_by_game(p_days)` and
+`click_series_hourly(p_hours)` aggregate them in Postgres and are the dashboard's
+only way in: both are security definer, both refuse anyone who is not an
+administrator, and both clamp their window. Fetching the raw rows instead would
+run into the API's 1000-row cap, which truncates without erroring — and since the
+rows read oldest first, a busy month would silently hide the most recent
+traffic.
+
 ### Abuse protection
 
 `record_game_click` throttles per caller: it keeps a salted one-way hash of the
@@ -142,13 +150,27 @@ generated randomly when the migration runs. Both tables have row level security
 on and no policies at all, so nothing outside the function can read them. The
 hash is never written to, or joined with, `click_counts`.
 
+The address is taken from `cf-connecting-ip`, which the edge sets from its own
+view of the connection, falling back to the **rightmost** element of
+`x-forwarded-for`. Proxies append to that header, so the last entry is what the
+nearest trusted proxy observed while the first is whatever the caller claimed —
+keying the throttle on the first would let anyone mint a fresh bucket per request
+by varying a header, and inflate a counter without limit.
+
+A second ceiling, keyed by the game rather than the caller, caps any one game at
+600 counted clicks a minute, so a flood spread across many genuine addresses
+cannot move a counter arbitrarily either. Only callers already inside their own
+per-caller ceiling reach it: were every request counted there, one address could
+spend its rejected calls pushing the game over the edge and suppress everybody
+else's clicks for the rest of the minute.
+
 The function returns normally when throttled, so a client cannot detect the
 ceiling and adapt to it.
 
 ## Design
 
 The visual language — tokens, type, spacing and the rules that keep it
-consistent — is recorded in `design-system/supply/MASTER.md`. In short:
+consistent — is recorded in `design-system/selly/MASTER.md`. In short:
 minimal and formal, a single blue, flat fills with **no gradients anywhere**,
 Inter, hairline borders instead of shadows, and SVG icons rather than emoji.
 
@@ -177,8 +199,9 @@ missing translation cannot slip through as a silent fallback to English.
 ## Testing
 
 ```bash
-npm test    # 69 unit tests — bucketing, schema, pages, components, data layer,
-            #   translation key parity, theme switching
+npm test    # 74 unit tests — summing, schema, pages, components, data layer,
+            #   translation key parity, theme switching, untrusted-name escaping,
+            #   content-security-policy hash
 ```
 
 The access rules are not covered by these: they run inside Postgres, so they are

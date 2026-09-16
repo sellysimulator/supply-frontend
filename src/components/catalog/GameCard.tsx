@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
 import { Badge, Card } from '../ui'
-import type { Game } from '../../types/game'
+import type { GameSummary } from '../../types/game'
 import { GameMeta } from './GameMeta'
 import { GameThumbnail } from './GameThumbnail'
 
 /** One catalog entry in the grid. The whole card is not a link — the
  *  "More details" action is, so the card's text stays selectable. */
-export function GameCard({ game }: { game: Game }) {
+export function GameCard({ game }: { game: GameSummary }) {
   const { t } = useTranslation()
 
   return (

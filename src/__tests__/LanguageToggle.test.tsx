@@ -39,6 +39,6 @@ describe('Language toggle', () => {
   it('remembers the choice for the next visit', async () => {
     render(<LanguageToggle />)
     await userEvent.click(screen.getByRole('button', { name: 'Cambiar a español' }))
-    expect(window.localStorage.getItem('supply-language')).toBe('es')
+    expect(window.localStorage.getItem('selly-language')).toBe('es')
   })
 })

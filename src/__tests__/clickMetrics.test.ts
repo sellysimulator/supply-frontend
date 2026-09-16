@@ -1,104 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import {
-  clicksByGame,
-  clicksInLastHours,
-  hourKey,
-  hourlySeries,
-  totalClicks,
-  truncateToHour,
-  type HourlyCount,
-} from '../data/clickMetrics'
+import { sumLastHours, totalClicks } from '../data/clickMetrics'
 
-/** Hours are UTC throughout, so the bucket a click lands in does not depend on
- *  where the visitor is, and matches the hour the database records against. */
-describe('hour bucketing', () => {
-  it('truncates a timestamp to the top of its UTC hour', () => {
-    const hour = truncateToHour(new Date('2026-09-14T15:47:31.512Z'))
-    expect(hour.toISOString()).toBe('2026-09-14T15:00:00.000Z')
+describe('totalClicks', () => {
+  it('sums every entry', () => {
+    expect(totalClicks([{ clickCount: 5 }, { clickCount: 2 }, { clickCount: 3 }])).toBe(10)
   })
 
-  it('derives a stable hour key for a timestamp', () => {
-    expect(hourKey(new Date('2026-09-14T15:47:31Z'))).toBe('2026-09-14T15')
-  })
-})
-
-const at = (iso: string, gameId: string, clickCount: number): HourlyCount => ({
-  gameId,
-  hour: new Date(iso),
-  clickCount,
-})
-
-describe('reporting', () => {
-  const counts = [
-    at('2026-09-14T10:00:00Z', 'beer-game', 5),
-    at('2026-09-14T10:00:00Z', 'selly', 2),
-    at('2026-09-14T11:00:00Z', 'beer-game', 3),
-  ]
-
-  it('totals every counter', () => {
-    expect(totalClicks(counts)).toBe(10)
-  })
-
-  it('sums per game, most launched first', () => {
-    expect(clicksByGame(counts)).toEqual([
-      { gameId: 'beer-game', clickCount: 8 },
-      { gameId: 'selly', clickCount: 2 },
-    ])
-  })
-
-  it('returns nothing for an empty period', () => {
+  it('returns zero for an empty series', () => {
     expect(totalClicks([])).toBe(0)
-    expect(clicksByGame([])).toEqual([])
   })
 })
 
-describe('hourly series', () => {
-  it('produces one dense entry per hour, including empty hours', () => {
-    const series = hourlySeries([], 12)
-    expect(series).toHaveLength(12)
-    expect(series.every((point) => point.clickCount === 0)).toBe(true)
-  })
-
-  it('runs in chronological order and ends at the current hour', () => {
-    const series = hourlySeries([], 6)
-    const times = series.map((point) => point.hour.getTime())
-    expect([...times].sort((a, b) => a - b)).toEqual(times)
-    expect(series.at(-1)?.hour.getTime()).toBe(truncateToHour(new Date()).getTime())
-  })
-
-  it('places a counter in its own hour', () => {
-    const thisHour = truncateToHour(new Date())
-    const series = hourlySeries([{ gameId: 'beer-game', hour: thisHour, clickCount: 7 }], 3)
-    expect(series.at(-1)).toEqual({ hour: thisHour, clickCount: 7 })
-  })
-
-  it('merges several games into one hourly total', () => {
-    const thisHour = truncateToHour(new Date())
-    const series = hourlySeries(
-      [
-        { gameId: 'beer-game', hour: thisHour, clickCount: 4 },
-        { gameId: 'selly', hour: thisHour, clickCount: 6 },
-      ],
-      2,
-    )
-    expect(series.at(-1)?.clickCount).toBe(10)
-  })
-
-  it('ignores counters older than the window', () => {
-    const old = new Date(truncateToHour(new Date()).getTime() - 100 * 60 * 60 * 1000)
-    const series = hourlySeries([{ gameId: 'beer-game', hour: old, clickCount: 9 }], 6)
-    expect(series.reduce((sum, point) => sum + point.clickCount, 0)).toBe(0)
-  })
-})
-
-describe('recent activity', () => {
-  it('counts only clicks inside the requested window', () => {
-    const thisHour = truncateToHour(new Date())
-    const longAgo = new Date(thisHour.getTime() - 48 * 60 * 60 * 1000)
-    const counts = [
-      { gameId: 'beer-game', hour: thisHour, clickCount: 3 },
-      { gameId: 'beer-game', hour: longAgo, clickCount: 99 },
+describe('sumLastHours', () => {
+  it('sums only the trailing entries of a dense series', () => {
+    const series = [
+      { clickCount: 100 }, // outside the window
+      { clickCount: 1 },
+      { clickCount: 2 },
+      { clickCount: 3 },
     ]
-    expect(clicksInLastHours(counts, 24)).toBe(3)
+    expect(sumLastHours(series, 3)).toBe(6)
+  })
+
+  it('sums the whole series when it is shorter than the window', () => {
+    expect(sumLastHours([{ clickCount: 4 }, { clickCount: 5 }], 24)).toBe(9)
+  })
+
+  it('returns zero for an empty series', () => {
+    expect(sumLastHours([], 24)).toBe(0)
   })
 })

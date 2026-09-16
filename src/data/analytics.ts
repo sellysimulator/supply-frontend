@@ -1,6 +1,4 @@
 import { supabase } from '../supabase/client'
-import type { ClickCountRow } from '../supabase/types'
-import { truncateToHour, type HourlyCount } from './clickMetrics'
 
 /**
  * Anonymous game-click analytics.
@@ -14,8 +12,6 @@ import { truncateToHour, type HourlyCount } from './clickMetrics'
  * exactly one thing: add one to the current hour's count for a published game.
  */
 
-const CLICK_COUNTS = 'click_counts'
-
 /**
  * Records one click. Deliberately best-effort: a blocked or failed analytics
  * call must never stop someone launching a game, so failures are logged and
@@ -26,30 +22,34 @@ export async function recordGameClick(gameId: string): Promise<void> {
   if (error) console.warn('Could not record game click', error.message)
 }
 
-function toHourlyCount(row: ClickCountRow): HourlyCount {
-  return {
-    gameId: row.game_id,
-    hour: new Date(row.hour),
-    clickCount: row.click_count,
-  }
+/**
+ * Total launches per game over the last `days` days, most launched first.
+ * Aggregated by `click_totals_by_game` in Postgres rather than by summing every
+ * raw counter row in the browser — the API's row cap would otherwise silently
+ * truncate that read on a busy site. Administrators only — the policies deny
+ * this read to everyone else, including the visitors who caused the counts.
+ */
+export async function listClickTotalsByGame(
+  days = 30,
+): Promise<{ gameId: string; clickCount: number }[]> {
+  const { data, error } = await supabase.rpc('click_totals_by_game', { p_days: days })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row) => ({ gameId: row.game_id, clickCount: row.click_count }))
 }
 
 /**
- * Every counter from the last `days` days. Administrators only — the policies
- * deny this read to everyone else, including the visitors who caused the
- * counts.
+ * A dense series with one entry per hour for the last `hours` hours, oldest
+ * first and ending at the current UTC hour — hours with no clicks present with
+ * `clickCount` 0, so the chart cannot mistake "no data" for "no traffic".
+ * Built by `click_series_hourly` in Postgres for the same reason as
+ * `listClickTotalsByGame`. Administrators only.
  */
-export async function listRecentClicks(days = 30): Promise<HourlyCount[]> {
-  const since = truncateToHour(new Date(Date.now() - days * 24 * 60 * 60 * 1000))
-
-  const { data, error } = await supabase
-    .from(CLICK_COUNTS)
-    .select('game_id, hour, click_count')
-    .gte('hour', since.toISOString())
-    .order('hour', { ascending: true })
-
+export async function listHourlyClickSeries(
+  hours = 48,
+): Promise<{ hour: Date; clickCount: number }[]> {
+  const { data, error } = await supabase.rpc('click_series_hourly', { p_hours: hours })
   if (error) throw new Error(error.message)
-  return (data ?? []).map(toHourlyCount)
+  return (data ?? []).map((row) => ({ hour: new Date(row.hour), clickCount: row.click_count }))
 }
 
 export * from './clickMetrics'

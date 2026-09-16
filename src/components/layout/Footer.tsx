@@ -11,7 +11,7 @@ export function Footer() {
     <footer className="mt-auto border-t border-border bg-card">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-foreground">Supply</p>
+          <p className="text-sm font-medium text-foreground">Selly</p>
           <p className="text-sm text-muted-foreground">{t('footer.tagline')}</p>
         </div>
 

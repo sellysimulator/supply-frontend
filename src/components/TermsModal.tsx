@@ -3,7 +3,7 @@ import { Button, Modal } from './ui'
 
 /**
  * Terms and conditions, opened from the footer. The substance the spec calls
- * for is the analytics disclosure: Supply counts game launches anonymously, in
+ * for is the analytics disclosure: Selly counts game launches anonymously, in
  * hourly totals, to understand which games draw interest.
  */
 export function TermsModal({ open, onClose }: { open: boolean; onClose: () => void }) {

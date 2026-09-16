@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { Clock, Users, GraduationCap } from 'lucide-react'
 import { durationLabel, playerRangeLabel } from '../../i18n/format'
-import type { Game } from '../../types/game'
+import type { GameSummary } from '../../types/game'
 
 /**
  * The three facts a visitor scans for before opening a game. Rendered
- * identically on the catalog card and the details page.
+ * identically on the catalog card and the details page, so it asks only for
+ * the summary fields both of them have.
  */
-export function GameMeta({ game, className }: { game: Game; className?: string }) {
+export function GameMeta({ game, className }: { game: GameSummary; className?: string }) {
   const { t } = useTranslation()
 
   const items = [

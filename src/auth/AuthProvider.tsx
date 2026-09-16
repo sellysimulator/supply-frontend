@@ -51,7 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [user])
+    // Depends on the id rather than `user` itself: `getSession()` and every
+    // `onAuthStateChange` event — including the hourly `TOKEN_REFRESHED` — hand
+    // back a new `User` object for the same signed-in account, and re-running
+    // this effect on each one would re-query `admins` for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   const isAdmin = user !== null && role?.userId === user.id && role.isAdmin
   const checkingRole = user !== null && role?.userId !== user.id

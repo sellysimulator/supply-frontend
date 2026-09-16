@@ -82,6 +82,14 @@ export type Database = {
         Args: Record<never, never>
         Returns: boolean
       }
+      click_totals_by_game: {
+        Args: { p_days: number }
+        Returns: { game_id: string; click_count: number }[]
+      }
+      click_series_hourly: {
+        Args: { p_hours: number }
+        Returns: { hour: string; click_count: number }[]
+      }
     }
     Enums: Record<never, never>
     CompositeTypes: Record<never, never>

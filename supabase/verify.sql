@@ -95,6 +95,20 @@ begin
   end;
   if not v_blocked then raise exception 'anon can read the analytics salt'; end if;
 
+  v_blocked := false;
+  begin
+    perform public.click_totals_by_game(30);
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'anon can call click_totals_by_game'; end if;
+
+  v_blocked := false;
+  begin
+    perform public.click_series_hourly(48);
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'anon can call click_series_hourly'; end if;
+
   raise notice 'anonymous access: OK';
 end $$;
 
@@ -133,6 +147,59 @@ begin
   if v_count <> 0 then raise exception 'a click was recorded for an unknown game'; end if;
 
   raise notice 'click recording: OK';
+end $$;
+
+-- ─── Per-game click ceiling ─────────────────────────────────────────────────
+-- A flood spread across many genuine addresses would clear the per-caller
+-- ceiling one bucket at a time, so a second ceiling caps how far any single
+-- game's counter can move in a minute regardless of how many callers are
+-- behind it. Pre-loading that game's bucket to the ceiling and issuing one
+-- more call — well within the per-caller ceiling on its own — proves it is
+-- the game bucket, not the caller bucket, doing the blocking.
+
+insert into public.games (
+  id, name, short_description, full_description,
+  min_players, max_players, duration_minutes, launch_url, published
+) values
+  ('verify-game-ceiling', 'Game Ceiling Fixture', 'A fixture for the per-game ceiling.',
+   'A published fixture used only to verify the per-game click ceiling.',
+   2, 4, 60, 'https://example.com/game-ceiling', true);
+
+do $$
+declare
+  v_salt text;
+  v_game_hash text;
+begin
+  select ip_salt into v_salt from public.analytics_secrets limit 1;
+  v_game_hash := encode(
+    sha256(convert_to('game:verify-game-ceiling' || v_salt, 'UTF8')), 'hex'
+  );
+
+  insert into public.click_rate_limit (ip_hash, window_start, hits)
+  values (v_game_hash, date_trunc('minute', now()), 600);
+end $$;
+
+set local role anon;
+
+do $$
+begin
+  perform public.record_game_click('verify-game-ceiling');
+end $$;
+
+reset role;
+
+do $$
+declare
+  v_count integer;
+  v_hour timestamptz := timezone('utc', date_trunc('hour', timezone('utc', now())));
+begin
+  select click_count into v_count
+    from public.click_counts where game_id = 'verify-game-ceiling' and hour = v_hour;
+  if coalesce(v_count, 0) <> 0 then
+    raise exception 'the per-game ceiling did not engage: click was recorded anyway';
+  end if;
+
+  raise notice 'per-game ceiling: OK';
 end $$;
 
 -- ─── Rate limiting ──────────────────────────────────────────────────────────
@@ -213,7 +280,94 @@ begin
     raise exception 'a non-administrator can read the click counters';
   end if;
 
+  v_blocked := false;
+  begin
+    perform public.click_totals_by_game(30);
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then
+    raise exception 'a non-administrator can call click_totals_by_game';
+  end if;
+
+  v_blocked := false;
+  begin
+    perform public.click_series_hourly(48);
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then
+    raise exception 'a non-administrator can call click_series_hourly';
+  end if;
+
   raise notice 'signed-in non-administrator: OK';
+end $$;
+
+reset role;
+
+-- ─── An administrator ───────────────────────────────────────────────────────
+-- admins.user_id carries a foreign key to auth.users, so the fixture needs a
+-- matching row there too; the owning role used to paste this script in can
+-- write to the auth schema directly, and the insert rolls back with everything
+-- else.
+
+insert into auth.users (id) values ('22222222-2222-2222-2222-222222222222');
+
+insert into public.admins (user_id, email)
+values ('22222222-2222-2222-2222-222222222222', 'verify-admin@example.com');
+
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
+
+do $$
+declare
+  v_hour timestamptz := timezone('utc', date_trunc('hour', timezone('utc', now())));
+  v_series_count integer;
+  v_last_hour timestamptz;
+  v_series_sum bigint;
+  v_totals_sum bigint;
+  v_published_count bigint;
+  v_expected_count bigint;
+begin
+  if not public.is_admin() then
+    raise exception 'the seeded administrator does not read as admin';
+  end if;
+
+  select count(*), max(hour) into v_series_count, v_last_hour
+    from public.click_series_hourly(48);
+  if v_series_count <> 48 then
+    raise exception 'click_series_hourly(48) should return 48 rows, got %', v_series_count;
+  end if;
+  if v_last_hour <> v_hour then
+    raise exception 'click_series_hourly(48) should end on the current UTC hour';
+  end if;
+
+  select coalesce(sum(click_count), 0) into v_series_sum from public.click_series_hourly(48);
+  select coalesce(sum(click_count), 0) into v_totals_sum from public.click_totals_by_game(30);
+  if v_series_sum <> v_totals_sum then
+    raise exception
+      'click_series_hourly and click_totals_by_game disagree: % vs %',
+      v_series_sum, v_totals_sum;
+  end if;
+
+  select coalesce(sum(click_count), 0) into v_expected_count
+    from public.click_counts where game_id = 'verify-published';
+  select click_count into v_published_count
+    from public.click_totals_by_game(30) where game_id = 'verify-published';
+  if v_published_count <> v_expected_count then
+    raise exception
+      'click_totals_by_game reported % clicks for verify-published, expected %',
+      v_published_count, v_expected_count;
+  end if;
+
+  if (select count(*) from public.click_series_hourly(100000)) <> 720 then
+    raise exception 'click_series_hourly(100000) should clamp to 720 rows';
+  end if;
+
+  if (select count(*) from public.click_series_hourly(0)) <> 1 then
+    raise exception 'click_series_hourly(0) should clamp to 1 row';
+  end if;
+
+  raise notice 'administrator analytics: OK';
 end $$;
 
 reset role;

@@ -14,7 +14,7 @@
     "catalog": "Catalog",
     "about": "About",
     "admin": "Admin",
-    "homeAria": "Supply — home",
+    "homeAria": "Selly — home",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
@@ -34,10 +34,10 @@
   "landing": {
     "eyebrow": "Supply chain education",
     "title": "A curated catalog of supply chain games and simulations",
-    "intro": "Supply brings together educational games — from the classic Beer Game to newer simulations — so instructors and learners can find the right one, understand what it teaches, and start playing.",
+    "intro": "Selly brings together educational games — from the classic Beer Game to newer simulations — so instructors and learners can find the right one, understand what it teaches, and start playing.",
     "browseCatalog": "Browse the catalog",
-    "aboutSupply": "About Supply",
-    "whatSupplyDoes": "What Supply does",
+    "aboutSelly": "About Selly",
+    "whatSellyDoes": "What Selly does",
     "values": {
       "find": {
         "title": "Find the right game",
@@ -49,7 +49,7 @@
       },
       "launch": {
         "title": "Launch it directly",
-        "body": "Each game runs as its own independent application. Supply links you straight to it — there is nothing to install here."
+        "body": "Each game runs as its own independent application. Selly links you straight to it — there is nothing to install here."
       }
     },
     "featured": {
@@ -61,20 +61,20 @@
     }
   },
   "about": {
-    "title": "About Supply",
+    "title": "About Selly",
     "description": "Why this catalog exists and what it is — and is not — responsible for.",
     "p1": "Games and simulations are among the most effective ways to teach how supply chains behave. The Beer Game has shown for decades that a lesson about delay, information loss and the bullwhip effect lands far harder when people live through it than when they read about it.",
     "p2": "The difficulty is finding them. Educational simulations are scattered across university pages, research projects and independent developers, usually described in terms that make it hard to tell how many players are needed, how long a session runs, or what a group is actually meant to learn. Choosing one often means running it first.",
-    "p3": "Supply exists to close that gap. It is a single place to discover supply chain games, read a consistent description of each, and open the one that fits. Every entry records the same facts in the same form — objectives, audience, group size, duration, supporting material — so two games can be compared without guesswork.",
+    "p3": "Selly exists to close that gap. It is a single place to discover supply chain games, read a consistent description of each, and open the one that fits. Every entry records the same facts in the same form — objectives, audience, group size, duration, supporting material — so two games can be compared without guesswork.",
     "p4": "The catalog is deliberately narrow in scope. It does not host the games, keep scores, manage sessions or collect anything about the people who play them. It describes and it links; the games themselves do the rest.",
     "boundaries": {
       "catalog": {
-        "title": "Supply is a catalog",
-        "body": "Supply holds the description of each game — what it teaches, who it is for, how long it takes — along with a link to where it runs. That is the whole of its job."
+        "title": "Selly is a catalog",
+        "body": "Selly holds the description of each game — what it teaches, who it is for, how long it takes — along with a link to where it runs. That is the whole of its job."
       },
       "independent": {
         "title": "The games are independent",
-        "body": "Every game in the catalog is built, deployed and maintained on its own, with its own interface, its own data and its own release schedule. Supply does not run them or store anything they produce."
+        "body": "Every game in the catalog is built, deployed and maintained on its own, with its own interface, its own data and its own release schedule. Selly does not run them or store anything they produce."
       },
       "curated": {
         "title": "Curated, not automated",
@@ -89,7 +89,7 @@
   },
   "catalog": {
     "title": "Catalog",
-    "description": "Browse the games and simulations available in Supply. Open a game's details to see what it teaches and how to run it.",
+    "description": "Browse the games and simulations available in Selly. Open a game's details to see what it teaches and how to run it.",
     "loading": "Loading the catalog",
     "loadError": "The catalog could not be loaded. Check your connection and try again.",
     "filterLabel": "Filter by category",
@@ -130,7 +130,7 @@
     "objectives": "Learning objectives",
     "screenshots": "Screenshots",
     "launch": "Launch game",
-    "launchNote": "Opens in a new tab. This game is operated independently of Supply.",
+    "launchNote": "Opens in a new tab. This game is operated independently of Selly.",
     "resources": "Instructions and resources",
     "tags": "Tags"
   },
@@ -311,14 +311,14 @@
   "terms": {
     "title": "Terms and Conditions",
     "catalogHeading": "About this catalog",
-    "catalogBody": "Supply is a catalog of educational games and simulations about supply chains. It helps you find a game and understand what it teaches. Supply does not run the games or manage gameplay. Each game listed here is an independently developed and operated application, reached through a link from this site.",
+    "catalogBody": "Selly is a catalog of educational games and simulations about supply chains. It helps you find a game and understand what it teaches. Selly does not run the games or manage gameplay. Each game listed here is an independently developed and operated application, reached through a link from this site.",
     "analyticsHeading": "Anonymous usage analytics",
-    "analyticsP1": "Supply collects anonymous data about interactions with the games in this catalog for the purpose of trend analysis. When you open a game from this site, we record which game was selected and the hour in which it happened. These records are kept as hourly totals per game.",
+    "analyticsP1": "Selly collects anonymous data about interactions with the games in this catalog for the purpose of trend analysis. When you open a game from this site, we record which game was selected and the hour in which it happened. These records are kept as hourly totals per game.",
     "analyticsP2": "These records do not contain your name, email address, account identifier, cookies, or any persistent identifier that could be used to recognise you or your device. We cannot link a recorded interaction back to an individual visitor, and we do not attempt to.",
     "analyticsP3": "To stop automated traffic from distorting these totals, the service briefly keeps a one-way hash of the network address a request came from, grouped by minute and discarded within minutes. It is never stored alongside, or connected to, the record of which game was opened.",
     "analyticsP4": "We use these totals only to understand which games attract the most interest and when that interest occurs, so the catalog can be curated and improved.",
     "gamesHeading": "Games listed in this catalog",
-    "gamesBody": "Following a link to a game takes you to a separate application that is not operated by Supply and is governed by its own terms and its own handling of any information you provide to it. Supply has no access to the data those games collect or store.",
+    "gamesBody": "Following a link to a game takes you to a separate application that is not operated by Selly and is governed by its own terms and its own handling of any information you provide to it. Selly has no access to the data those games collect or store.",
     "adminHeading": "Administrator sign-in",
     "adminBody": "Signing in with Google is available only to catalog administrators and is used solely to authorise changes to catalog content. Visitors do not need an account to browse the catalog or to open a game."
   }

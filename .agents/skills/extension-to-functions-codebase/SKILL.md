@@ -19,7 +19,7 @@ Leverages native Cloud Functions features (declarative IAM, Parameterized
 Config, SDK Lifecycle Hooks) and modernizes 1st Gen triggers to 2nd Gen using
 the Destructuring Compatibility Shim.
 
-______________________________________________________________________
+---
 
 ## Target Migration Workflows
 
@@ -37,7 +37,7 @@ ______________________________________________________________________
   - Usage: Consumers install package and re-export functions in `index.ts`
     (`export * from "<package-name>"`).
 
-______________________________________________________________________
+---
 
 ## Core Rules & Constraints
 
@@ -54,15 +54,15 @@ instructions:
 - **Never call `.value()` at top-level module load scope.**
 - Initialize global SDK instances inside `onInit()` or lazy getters:
   ```typescript
-  import { defineString } from "firebase-functions/params";
-  import { onInit } from "firebase-functions/v2";
+  import { defineString } from 'firebase-functions/params'
+  import { onInit } from 'firebase-functions/v2'
 
-  const dataset = defineString("DATASET_ID");
-  let client: BigQuery;
+  const dataset = defineString('DATASET_ID')
+  let client: BigQuery
 
   onInit(() => {
-    client = new BigQuery({ datasetId: dataset.value() });
-  });
+    client = new BigQuery({ datasetId: dataset.value() })
+  })
   ```
 
 ### 3. V2 Concurrency & Cost Parity
@@ -70,7 +70,7 @@ instructions:
 V2 enables concurrency (up to 80 requests). To preserve V1 single-concurrency
 pricing, set `cpu: "gcf_gen1"`.
 
-______________________________________________________________________
+---
 
 ## Step-by-Step Migration Execution
 

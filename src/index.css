@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Design tokens — the single source of truth for Supply's visual language.
+   Design tokens — the single source of truth for Selly's visual language.
 
    Direction: minimal, modern, formal, blue. Flat fills only; there are no
    gradients anywhere in this application by design. Components reference these
@@ -14,7 +14,7 @@
    Tailwind color onto the variable rather than a copy of its value, so the
    utilities follow whichever palette is active.
 
-   See design-system/supply/MASTER.md for the reasoning behind these choices.
+   See design-system/selly/MASTER.md for the reasoning behind these choices.
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* Dark styling is driven by the class on <html>, never by the media query alone

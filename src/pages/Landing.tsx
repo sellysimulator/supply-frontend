@@ -14,8 +14,7 @@ const VALUE_POINTS = [
 
 export default function Landing() {
   const { t } = useTranslation()
-  const { data: games, loading } = useAsync(() => listPublishedGames(), [])
-  const featured = (games ?? []).slice(0, 3)
+  const { data: featured, loading } = useAsync(() => listPublishedGames(3), [])
 
   return (
     <>
@@ -36,7 +35,7 @@ export default function Landing() {
                 <ArrowRight size={16} aria-hidden="true" />
               </ButtonLink>
               <ButtonLink to="/about" size="lg" variant="secondary">
-                {t('landing.aboutSupply')}
+                {t('landing.aboutSelly')}
               </ButtonLink>
             </div>
           </div>
@@ -44,9 +43,9 @@ export default function Landing() {
       </section>
 
       <PageContainer>
-        <section aria-labelledby="what-supply-does" className="mb-14">
-          <h2 id="what-supply-does" className="sr-only">
-            {t('landing.whatSupplyDoes')}
+        <section aria-labelledby="what-selly-does" className="mb-14">
+          <h2 id="what-selly-does" className="sr-only">
+            {t('landing.whatSellyDoes')}
           </h2>
           <ul className="grid grid-cols-1 gap-5 md:grid-cols-3">
             {VALUE_POINTS.map(({ key, icon: Icon }) => (
@@ -85,7 +84,7 @@ export default function Landing() {
 
           {loading ? (
             <LoadingSection label={t('landing.featured.loading')} />
-          ) : featured.length === 0 ? (
+          ) : !featured || featured.length === 0 ? (
             <Card>
               <CardBody className="py-10 text-center text-muted-foreground">
                 {t('landing.featured.empty')}

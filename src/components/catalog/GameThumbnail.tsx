@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Layers } from 'lucide-react'
-import type { Game } from '../../types/game'
+import type { GameSummary } from '../../types/game'
 
 /**
  * Fixed 16:9 box so the grid never shifts while images load, with a flat
  * placeholder for entries that have no thumbnail yet.
  */
-export function GameThumbnail({ game, className }: { game: Game; className?: string }) {
+export function GameThumbnail({ game, className }: { game: GameSummary; className?: string }) {
   const { t } = useTranslation()
 
   return (

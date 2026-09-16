@@ -18,7 +18,25 @@ export const SUPPORTED_LANGUAGES = ['en', 'es'] as const
 export type Language = (typeof SUPPORTED_LANGUAGES)[number]
 
 /** Where the reader's choice is remembered, alongside the theme's key. */
-export const LANGUAGE_STORAGE_KEY = 'supply-language'
+export const LANGUAGE_STORAGE_KEY = 'selly-language'
+
+/** The key's previous name. i18next-browser-languagedetector only reads and
+ *  writes LANGUAGE_STORAGE_KEY, so a value saved under the old key is copied
+ *  across once before init, then left alone. */
+const LEGACY_LANGUAGE_STORAGE_KEY = 'supply-language'
+try {
+  if (
+    window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === null &&
+    window.localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY) !== null
+  ) {
+    window.localStorage.setItem(
+      LANGUAGE_STORAGE_KEY,
+      window.localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY)!,
+    )
+  }
+} catch {
+  /* Private browsing can refuse storage; the detector falls back to the browser language. */
+}
 
 void i18n
   .use(LanguageDetector)

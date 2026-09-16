@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Supply is a curated catalog of educational supply chain games and simulations."
+      content="Selly is a curated catalog of educational supply chain games and simulations."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,14 +14,23 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <title>Supply — Supply Chain Games &amp; Simulations</title>
+    <title>Selly — Supply Chain Games &amp; Simulations</title>
     <script>
       /* Applies the remembered theme before the first paint, so a reader who
          chose dark never sees a white flash while React boots. The key and the
-         values match src/theme/context.ts. */
+         values match src/theme/context.ts. Reads the current 'selly-theme'
+         key, falling back to the old 'supply-theme' key so a reader who chose
+         a theme before the rename does not lose it. The exact text of this
+         inline script, byte for byte, is allow-listed in the
+         Content-Security-Policy in firebase.json by its SHA-256 hash, because
+         a static host cannot issue a per-request nonce. Editing so much as a
+         space here changes the hash and the browser will silently refuse to
+         run the script, bringing back the white flash with no build-time
+         warning — recompute and update that hash in firebase.json in the same
+         change. */
       ;(function () {
         try {
-          var stored = localStorage.getItem('supply-theme')
+          var stored = localStorage.getItem('selly-theme') ?? localStorage.getItem('supply-theme')
           var dark =
             stored === 'dark' ||
             ((stored === null || stored === 'system') &&

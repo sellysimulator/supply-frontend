@@ -11,7 +11,7 @@ values (
   'catalog-images',
   true,
   5242880,
-  array['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']
+  array['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 )
 on conflict (id) do update
   set public = excluded.public,
@@ -26,15 +26,15 @@ create policy "Catalog images are publicly readable"
 drop policy if exists "Administrators upload catalog images" on storage.objects;
 create policy "Administrators upload catalog images"
   on storage.objects for insert to authenticated
-  with check (bucket_id = 'catalog-images' and public.is_admin());
+  with check (bucket_id = 'catalog-images' and (select public.is_admin()));
 
 drop policy if exists "Administrators replace catalog images" on storage.objects;
 create policy "Administrators replace catalog images"
   on storage.objects for update to authenticated
-  using (bucket_id = 'catalog-images' and public.is_admin())
-  with check (bucket_id = 'catalog-images' and public.is_admin());
+  using (bucket_id = 'catalog-images' and (select public.is_admin()))
+  with check (bucket_id = 'catalog-images' and (select public.is_admin()));
 
 drop policy if exists "Administrators delete catalog images" on storage.objects;
 create policy "Administrators delete catalog images"
   on storage.objects for delete to authenticated
-  using (bucket_id = 'catalog-images' and public.is_admin());
+  using (bucket_id = 'catalog-images' and (select public.is_admin()));

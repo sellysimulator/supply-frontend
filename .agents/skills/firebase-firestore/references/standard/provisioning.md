@@ -65,7 +65,7 @@ service cloud.firestore {
 }
 ```
 
-*See the `firestore-rules-creation` skill for how to write actual rules.*
+_See the `firestore-rules-creation` skill for how to write actual rules._
 
 ### 3. Create `firestore.indexes.json`
 
@@ -79,7 +79,7 @@ start:
 }
 ```
 
-*See [indexes.md](indexes.md) for how to configure indexes.*
+_See [indexes.md](indexes.md) for how to configure indexes._
 
 ## Deploy database, rules and indexes
 

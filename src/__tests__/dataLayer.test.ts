@@ -26,7 +26,8 @@ vi.mock('../supabase/client', () => ({
   },
 }))
 
-const { recordGameClick } = await import('../data/analytics')
+const { recordGameClick, listClickTotalsByGame, listHourlyClickSeries } =
+  await import('../data/analytics')
 const { uploadCatalogImage, deleteCatalogImages } = await import('../data/images')
 
 beforeEach(() => {
@@ -50,6 +51,55 @@ describe('recording a click', () => {
   it('survives the call rejecting outright', async () => {
     rpc.mockRejectedValue(new Error('offline'))
     await expect(recordGameClick('beer-game')).rejects.toBeInstanceOf(Error)
+  })
+})
+
+describe('reading per-game click totals', () => {
+  it('calls the database function with the argument name it declares', async () => {
+    rpc.mockResolvedValue({ data: [], error: null })
+    await listClickTotalsByGame(30)
+    expect(rpc).toHaveBeenCalledWith('click_totals_by_game', { p_days: 30 })
+  })
+
+  it('maps rows to the camelCase domain shape', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        { game_id: 'beer-game', click_count: 12 },
+        { game_id: 'selly', click_count: 4 },
+      ],
+      error: null,
+    })
+    await expect(listClickTotalsByGame()).resolves.toEqual([
+      { gameId: 'beer-game', clickCount: 12 },
+      { gameId: 'selly', clickCount: 4 },
+    ])
+  })
+
+  it('throws so the dashboard can show its error state', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'permission denied' } })
+    await expect(listClickTotalsByGame()).rejects.toThrow(/permission denied/)
+  })
+})
+
+describe('reading the hourly click series', () => {
+  it('calls the database function with the argument name it declares', async () => {
+    rpc.mockResolvedValue({ data: [], error: null })
+    await listHourlyClickSeries(48)
+    expect(rpc).toHaveBeenCalledWith('click_series_hourly', { p_hours: 48 })
+  })
+
+  it('maps rows to the camelCase domain shape, parsing the hour into a Date', async () => {
+    rpc.mockResolvedValue({
+      data: [{ hour: '2026-09-14T15:00:00.000Z', click_count: 7 }],
+      error: null,
+    })
+    const [point] = await listHourlyClickSeries()
+    expect(point).toEqual({ hour: new Date('2026-09-14T15:00:00.000Z'), clickCount: 7 })
+  })
+
+  it('throws so the dashboard can show its error state', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'permission denied' } })
+    await expect(listHourlyClickSeries()).rejects.toThrow(/permission denied/)
   })
 })
 

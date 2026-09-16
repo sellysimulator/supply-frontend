@@ -1,4 +1,4 @@
--- Supply catalog schema.
+-- Selly catalog schema.
 --
 -- Authorization lives in row level security, because the browser talks to
 -- Postgres directly with the anon key and there is no application server in
@@ -100,23 +100,23 @@ alter table public.games enable row level security;
 drop policy if exists "Published games are readable by everyone" on public.games;
 create policy "Published games are readable by everyone"
   on public.games for select
-  using (published or public.is_admin());
+  using (published or (select public.is_admin()));
 
 drop policy if exists "Administrators create games" on public.games;
 create policy "Administrators create games"
   on public.games for insert to authenticated
-  with check (public.is_admin());
+  with check ((select public.is_admin()));
 
 drop policy if exists "Administrators update games" on public.games;
 create policy "Administrators update games"
   on public.games for update to authenticated
-  using (public.is_admin())
-  with check (public.is_admin());
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
 
 drop policy if exists "Administrators delete games" on public.games;
 create policy "Administrators delete games"
   on public.games for delete to authenticated
-  using (public.is_admin());
+  using ((select public.is_admin()));
 
 -- ─── Anonymous click analytics ──────────────────────────────────────────────
 -- One row per game per hour. No visitor identifier is stored: not a name,
@@ -142,7 +142,7 @@ alter table public.click_counts enable row level security;
 drop policy if exists "Administrators read click counts" on public.click_counts;
 create policy "Administrators read click counts"
   on public.click_counts for select to authenticated
-  using (public.is_admin());
+  using ((select public.is_admin()));
 
 -- Abuse throttling state. Unreachable from any client: row level security is on
 -- and no policy grants anything, so only the security definer function below
@@ -182,6 +182,13 @@ alter table public.analytics_secrets enable row level security;
 -- Throttling keeps a salted one-way hash of the caller's address for a few
 -- minutes, bucketed by minute. It is never written to click_counts and never
 -- joined to it, so the analytics themselves stay anonymous.
+--
+-- The address itself prefers cf-connecting-ip, which Cloudflare sets from its
+-- own view of the connection and overwrites on the way in, so a client cannot
+-- forge it. Falling back to x-forwarded-for, the rightmost element is used
+-- rather than the leftmost: proxies append to that header, so the last entry
+-- is the address the nearest trusted proxy actually observed, while the first
+-- is whatever the caller claimed and is trivial to spoof.
 create or replace function public.record_game_click(p_game_id text)
 returns void
 language plpgsql
@@ -191,10 +198,14 @@ as $$
 declare
   v_hour timestamptz;
   v_window timestamptz;
+  v_headers json;
+  v_xff_parts text[];
   v_client text;
   v_salt text;
   v_ip_hash text;
   v_hits integer;
+  v_game_hash text;
+  v_game_hits integer;
 begin
   if not exists (
     select 1 from public.games where id = p_game_id and published
@@ -205,23 +216,18 @@ begin
   v_hour := timezone('utc', date_trunc('hour', timezone('utc', now())));
   v_window := date_trunc('minute', now());
 
+  v_headers := current_setting('request.headers', true)::json;
+  v_xff_parts := string_to_array(coalesce(v_headers ->> 'x-forwarded-for', ''), ',');
+
   v_client := coalesce(
-    nullif(
-      split_part(
-        coalesce(
-          current_setting('request.headers', true)::json ->> 'x-forwarded-for',
-          ''
-        ),
-        ',',
-        1
-      ),
-      ''
-    ),
+    nullif(v_headers ->> 'cf-connecting-ip', ''),
+    nullif(trim(v_xff_parts[array_length(v_xff_parts, 1)]), ''),
     'unknown'
   );
 
   select ip_salt into v_salt from public.analytics_secrets limit 1;
   v_ip_hash := encode(sha256(convert_to(v_client || v_salt, 'UTF8')), 'hex');
+  v_game_hash := encode(sha256(convert_to('game:' || p_game_id || v_salt, 'UTF8')), 'hex');
 
   -- Pruned occasionally rather than on every call: the table is tiny and a
   -- delete on each click would cost more than the rows it removes.
@@ -242,10 +248,98 @@ begin
     return;
   end if;
 
+  -- A second bucket, keyed by the game rather than the caller, caps how far
+  -- any one game's counter can move in a minute even when the flood behind it
+  -- is spread across many genuine addresses rather than coming from one.
+  --
+  -- It is reached only by callers already inside their own ceiling, which is
+  -- what stops it becoming an easier attack than the one it defends against:
+  -- were every request counted here, a single address could spend its rejected
+  -- calls pushing this bucket over the edge and suppress everyone else's clicks
+  -- for the rest of the minute.
+  insert into public.click_rate_limit as rl (ip_hash, window_start, hits)
+  values (v_game_hash, v_window, 1)
+  on conflict (ip_hash, window_start)
+    do update set hits = rl.hits + 1
+  returning rl.hits into v_game_hits;
+
+  if v_game_hits > 600 then
+    return;
+  end if;
+
   insert into public.click_counts as cc (game_id, hour, click_count)
   values (p_game_id, v_hour, 1)
   on conflict (game_id, hour)
     do update set click_count = cc.click_count + 1;
+end;
+$$;
+
+-- The dashboard reads its figures through these two aggregates rather than
+-- fetching raw click_counts rows into the browser and summing them there.
+-- Supabase caps API responses at 1000 rows and truncates silently, and
+-- because the raw rows would be ordered oldest first, a truncated read would
+-- understate exactly the most recent traffic instead of erroring.
+create or replace function public.click_totals_by_game(p_days integer default 30)
+returns table (game_id text, click_count bigint)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_days integer;
+  v_since timestamptz;
+begin
+  if not (select public.is_admin()) then
+    raise exception 'only administrators may read click analytics'
+      using errcode = '42501';
+  end if;
+
+  v_days := least(greatest(coalesce(p_days, 30), 1), 365);
+  v_since := timezone('utc', date_trunc('hour', timezone('utc', now())))
+    - (v_days || ' days')::interval;
+
+  return query
+    select cc.game_id, sum(cc.click_count)::bigint
+      from public.click_counts cc
+     where cc.hour >= v_since
+     group by cc.game_id
+     order by 2 desc;
+end;
+$$;
+
+create or replace function public.click_series_hourly(p_hours integer default 48)
+returns table (hour timestamptz, click_count bigint)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_hours integer;
+  v_current_hour timestamptz;
+begin
+  if not (select public.is_admin()) then
+    raise exception 'only administrators may read click analytics'
+      using errcode = '42501';
+  end if;
+
+  v_hours := least(greatest(coalesce(p_hours, 48), 1), 720);
+  v_current_hour := timezone('utc', date_trunc('hour', timezone('utc', now())));
+
+  -- generate_series supplies the dense hourly spine so an hour with no clicks
+  -- is returned as a zero rather than a gap; a gap in the chart would read as
+  -- no data rather than no traffic.
+  return query
+    select spine.hour, coalesce(sum(cc.click_count), 0)::bigint
+      from generate_series(
+             v_current_hour - ((v_hours - 1) || ' hours')::interval,
+             v_current_hour,
+             interval '1 hour'
+           ) as spine(hour)
+      left join public.click_counts cc on cc.hour = spine.hour
+     group by spine.hour
+     order by 1;
 end;
 $$;
 
@@ -279,3 +373,12 @@ grant execute on function public.record_game_click(text) to anon, authenticated;
 -- anon needs this too: the catalog's select policy evaluates is_admin(), and a
 -- caller without execute permission would error instead of reading the catalog.
 grant execute on function public.is_admin() to anon, authenticated, service_role;
+
+-- These are security definer and carry their own admin check in the body, so
+-- the grant only needs to reach authenticated callers; Postgres grants execute
+-- on new functions to PUBLIC by default, so that default is revoked first.
+revoke all on function public.click_totals_by_game(integer) from public, anon;
+grant execute on function public.click_totals_by_game(integer) to authenticated;
+
+revoke all on function public.click_series_hourly(integer) from public, anon;
+grant execute on function public.click_series_hourly(integer) to authenticated;

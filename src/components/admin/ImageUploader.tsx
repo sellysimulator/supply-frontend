@@ -35,10 +35,11 @@ export function ImageUploader({
     setBusy(true)
     setError(null)
     try {
-      const uploaded: StoredImage[] = []
-      for (const file of Array.from(files)) {
-        uploaded.push(await uploadCatalogImage(gameId, file))
-      }
+      // Uploads are independent, so they run concurrently; `Promise.all`
+      // preserves the order the files were selected in.
+      const uploaded = await Promise.all(
+        Array.from(files).map((file) => uploadCatalogImage(gameId, file)),
+      )
       onChange(multiple ? [...images, ...uploaded] : (uploaded.slice(-1) as StoredImage[]))
     } catch {
       setError(t('admin.images.uploadFailed'))
@@ -66,7 +67,7 @@ export function ImageUploader({
         <input
           ref={inputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp,image/gif"
           multiple={multiple}
           onChange={(event) => void onFiles(event.target.files)}
           className="sr-only"

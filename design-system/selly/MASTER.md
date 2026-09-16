@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** Supply
+**Project:** Selly
 **Generated:** 2026-09-14 19:25:20
 **Category:** Directory / Listing Site
 **Design Dials:** Variance 3/10 (Centered / Minimal) | Motion 2/10 (Subtle) | Density 5/10 (Standard)

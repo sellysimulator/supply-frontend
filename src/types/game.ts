@@ -81,6 +81,26 @@ export type Game = GameInput & {
   updatedAt: Date | null
 }
 
+/**
+ * The fields a catalog card renders: a thumbnail, a name and summary, its
+ * categories, and the player/duration facts in `GameMeta`. Defined as a `Pick`
+ * of `Game` rather than restated field types, so a full `Game` is always
+ * assignable where a `GameSummary` is expected and the two cannot drift.
+ */
+export type GameSummary = Pick<
+  Game,
+  | 'id'
+  | 'name'
+  | 'shortDescription'
+  | 'audience'
+  | 'categories'
+  | 'minPlayers'
+  | 'maxPlayers'
+  | 'durationMinutes'
+  | 'thumbnail'
+  | 'sortOrder'
+>
+
 /** Defaults for a blank "add game" form. */
 export const emptyGameInput: GameInput = {
   name: '',

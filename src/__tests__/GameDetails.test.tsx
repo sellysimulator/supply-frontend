@@ -17,7 +17,7 @@ const { default: GameDetails } = await import('../pages/GameDetails')
 const game: Game = {
   ...emptyGameInput,
   id: 'selly',
-  name: 'Selly',
+  name: 'Tequila Game',
   shortDescription: 'A real-time supply chain simulator.',
   fullDescription: 'First paragraph.\n\nSecond paragraph.',
   learningObjectives: ['Experience the bullwhip effect'],
@@ -51,7 +51,9 @@ describe('Game details page', () => {
     getGame.mockResolvedValue(game)
     renderDetails()
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Selly' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Tequila Game' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('First paragraph.')).toBeInTheDocument()
     expect(screen.getByText('Second paragraph.')).toBeInTheDocument()
     expect(screen.getByText('Experience the bullwhip effect')).toBeInTheDocument()
@@ -80,7 +82,7 @@ describe('Game details page', () => {
   it('does not record a click merely for viewing the page', async () => {
     getGame.mockResolvedValue(game)
     renderDetails()
-    await screen.findByRole('heading', { level: 1, name: 'Selly' })
+    await screen.findByRole('heading', { level: 1, name: 'Tequila Game' })
     expect(recordGameClick).not.toHaveBeenCalled()
   })
 

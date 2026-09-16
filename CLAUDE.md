@@ -1,12 +1,12 @@
-# CLAUDE.md — working on the Supply frontend
+# CLAUDE.md — working on the Selly frontend
 
-Supply is a **catalog** of educational supply chain games and simulations. It
+Selly is a **catalog** of educational supply chain games and simulations. It
 describes each game and links out to it. It never runs a game, stores game data,
 or acts as a backend for one.
 
 The sibling projects under `../` (`Selly`, `Beery`, `Lemony`, `Pulky`) are the
 games this catalog lists. Their stack — FastAPI, Socket.IO, MySQL, Redis,
-`game_stack.md` — describes **them**, not Supply. Do not import their
+`game_stack.md` — describes **them**, not Selly. Do not import their
 conventions here.
 
 Read this file before exploring. It is meant to spare you the search.
@@ -75,8 +75,8 @@ src/
     types.ts            snake_case row types — the only place column names live
   data/                 every read and write; pages never call supabase directly
     games.ts            catalog CRUD, row ↔ domain mapping
-    analytics.ts        record_game_click RPC, counter reads
-    clickMetrics.ts     pure bucketing/aggregation helpers (unit-tested)
+    analytics.ts        record_game_click RPC, the two aggregate reads
+    clickMetrics.ts     pure summing helpers (unit-tested)
     images.ts           uploads to games/{gameId}/… in catalog-images
   types/game.ts         zod schema + Game/GameInput types + emptyGameInput
   hooks/useAsync.ts     the loading/error/data/reload shape every page uses
@@ -97,7 +97,7 @@ src/
 
 supabase/migrations/    schema + RLS policies; 0002 creates the image bucket
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
-design-system/supply/MASTER.md   the visual spec
+design-system/selly/MASTER.md   the visual spec
 scripts/seed-catalog.mjs         bulk loader (Node, service role)
 ```
 
@@ -154,7 +154,7 @@ const { t } = useTranslation()
   testable.
 - **Dates and numbers** are formatted with `toLocaleString`-family calls and the
   active locale (`i18n.resolvedLanguage`), never a hardcoded `'en-US'`.
-- The choice is remembered under `supply-language` and `<html lang>` follows it.
+- The choice is remembered under `selly-language` and `<html lang>` follows it.
 - **Adding a third language:** add the JSON file, register it in
   `src/i18n/index.ts`, and replace `LanguageToggle` with the `Select` primitive
   driven by `SUPPORTED_LANGUAGES`.
@@ -163,8 +163,15 @@ const { t } = useTranslation()
 
 `ThemeProvider` resolves `light | dark | system` and toggles a `dark` class on
 `<html>`. An inline script in `index.html` applies the remembered choice before
-the first paint, so there is no white flash; it reads the same `supply-theme`
+the first paint, so there is no white flash; it reads the same `selly-theme`
 key as `src/theme/context.ts`, and the two must stay in step.
+
+That script's exact text is allow-listed by SHA-256 hash in the
+Content-Security-Policy in `firebase.json`, because a static host cannot issue a
+per-request nonce. Editing it by so much as a space means recomputing that hash
+in the same change; `src/__tests__/csp.test.ts` fails when the two drift apart,
+which is the only thing that catches it — the browser just declines to run the
+script, and the build still succeeds.
 
 `src/index.css` is the whole of the theming:
 
@@ -191,9 +198,11 @@ constructed: `src/data/*` is mocked with `vi.mock`. `setup.ts` pins i18next to
 English (assertions quote the English copy) and stubs `matchMedia` for jsdom.
 
 Covered: catalog page behaviour, game card and details, terms disclosure, click
-bucketing, the zod schema, the data layer, translation key parity, and the theme
-toggle. Access rules are **not** covered here — they live in Postgres and are
-proven by running `supabase/verify.sql`.
+summing, the zod schema, the data layer, translation key parity, the theme
+toggle, that an untrusted game name renders as text rather than markup, and that
+the Content-Security-Policy still matches the inline script it allow-lists.
+Access rules are **not** covered here — they live in Postgres and are proven by
+running `supabase/verify.sql`.
 
 ## Data model in one paragraph
 
@@ -203,4 +212,6 @@ analytics key, so it can never be renamed in place. Public reads are limited to
 writable by nobody — the first administrator is inserted with the service role.
 `click_counts` holds one row per game per hour with no visitor identifier of any
 kind; clients cannot write it, and `record_game_click(p_game_id)` is the only way
-in. Deleting a game leaves its counters intact.
+in. Deleting a game leaves its counters intact. The dashboard never reads those
+rows directly — `click_totals_by_game` and `click_series_hourly` aggregate them
+in Postgres, so the figures cannot be silently truncated by the API's row cap.

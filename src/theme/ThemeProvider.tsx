@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
+  LEGACY_THEME_STORAGE_KEY,
   THEME_STORAGE_KEY,
   ThemeContext,
   type ResolvedTheme,
@@ -11,7 +12,11 @@ const DARK_QUERY = '(prefers-color-scheme: dark)'
 
 function readStoredPreference(): ThemePreference {
   try {
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+    // Fall back to the pre-rename key once, so a reader who already chose a
+    // theme does not see it reset to system.
+    const stored =
+      window.localStorage.getItem(THEME_STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_THEME_STORAGE_KEY)
     if (stored === 'light' || stored === 'dark' || stored === 'system') return stored
   } catch {
     /* Private browsing can refuse storage; the system preference still works. */

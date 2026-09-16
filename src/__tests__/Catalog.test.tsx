@@ -38,12 +38,12 @@ describe('Catalog page', () => {
   it('lists the published games once loaded', async () => {
     listPublishedGames.mockResolvedValue([
       game('beer-game', 'Beer Game', ['Simulation']),
-      game('selly', 'Selly', ['Multiplayer']),
+      game('selly', 'Tequila Game', ['Multiplayer']),
     ])
     renderCatalog()
 
     expect(await screen.findByRole('heading', { name: 'Beer Game' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Selly' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tequila Game' })).toBeInTheDocument()
     expect(screen.getByText('2 games')).toBeInTheDocument()
   })
 
@@ -51,14 +51,14 @@ describe('Catalog page', () => {
     const user = userEvent.setup()
     listPublishedGames.mockResolvedValue([
       game('beer-game', 'Beer Game', ['Simulation']),
-      game('selly', 'Selly', ['Multiplayer']),
+      game('selly', 'Tequila Game', ['Multiplayer']),
     ])
     renderCatalog()
     await screen.findByRole('heading', { name: 'Beer Game' })
 
     await user.click(screen.getByRole('button', { name: 'Multiplayer' }))
     expect(screen.queryByRole('heading', { name: 'Beer Game' })).not.toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Selly' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tequila Game' })).toBeInTheDocument()
     expect(screen.getByText('1 game in Multiplayer')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'All' }))
@@ -73,11 +73,13 @@ describe('Catalog page', () => {
 
   it('offers a retry when the catalog cannot be loaded', async () => {
     listPublishedGames.mockRejectedValueOnce(new Error('permission-denied'))
-    listPublishedGames.mockResolvedValueOnce([game('selly', 'Selly', [])])
+    listPublishedGames.mockResolvedValueOnce([game('selly', 'Tequila Game', [])])
     renderCatalog()
 
     const retry = await screen.findByRole('button', { name: /try again/i })
     await userEvent.click(retry)
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Selly' })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Tequila Game' })).toBeInTheDocument(),
+    )
   })
 })

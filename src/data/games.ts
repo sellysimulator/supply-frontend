@@ -1,6 +1,6 @@
 import { supabase } from '../supabase/client'
 import type { GameRow, GameWriteRow } from '../supabase/types'
-import type { Game, GameInput, StoredImage } from '../types/game'
+import type { Game, GameInput, GameSummary, StoredImage } from '../types/game'
 
 /**
  * Every catalog read and write. Pages and components call these functions
@@ -9,6 +9,44 @@ import type { Game, GameInput, StoredImage } from '../types/game'
  */
 
 const GAMES = 'games'
+
+/**
+ * The columns a catalog card needs — kept next to `toGameSummary` so the
+ * PostgREST projection and the row-to-summary mapping cannot drift apart.
+ * Deliberately excludes `full_description` (unbounded text) and the
+ * `resources`/`screenshots` jsonb columns, which no card renders.
+ */
+const GAME_SUMMARY_COLUMNS =
+  'id, name, short_description, audience, categories, min_players, max_players, duration_minutes, thumbnail, sort_order'
+
+type GameSummaryRow = Pick<
+  GameRow,
+  | 'id'
+  | 'name'
+  | 'short_description'
+  | 'audience'
+  | 'categories'
+  | 'min_players'
+  | 'max_players'
+  | 'duration_minutes'
+  | 'thumbnail'
+  | 'sort_order'
+>
+
+function toGameSummary(row: GameSummaryRow): GameSummary {
+  return {
+    id: row.id,
+    name: row.name,
+    shortDescription: row.short_description,
+    audience: row.audience ?? '',
+    categories: row.categories ?? [],
+    minPlayers: row.min_players,
+    maxPlayers: row.max_players,
+    durationMinutes: row.duration_minutes,
+    thumbnail: row.thumbnail,
+    sortOrder: row.sort_order,
+  }
+}
 
 function toGame(row: GameRow): Game {
   return {
@@ -59,19 +97,25 @@ function toRow(gameId: string, input: GameInput): GameWriteRow {
 /* ─── Public reads ──────────────────────────────────────────────────────────*/
 
 /**
- * The public catalog. Unpublished entries are filtered out by row level
- * security, so this returns only what the caller is allowed to see.
+ * The public catalog, as the cards that list it render it. Unpublished entries
+ * are filtered out by row level security, so this returns only what the caller
+ * is allowed to see. `limit` bounds the row count for callers — like the
+ * landing page — that only ever show the first few; the ordering matches the
+ * `games_catalog_order_idx (published, sort_order, name)` index.
  */
-export async function listPublishedGames(): Promise<Game[]> {
-  const { data, error } = await supabase
+export async function listPublishedGames(limit?: number): Promise<GameSummary[]> {
+  let query = supabase
     .from(GAMES)
-    .select('*')
+    .select(GAME_SUMMARY_COLUMNS)
     .eq('published', true)
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
 
+  if (limit !== undefined) query = query.limit(limit)
+
+  const { data, error } = await query
   if (error) throw new Error(error.message)
-  return (data ?? []).map(toGame)
+  return (data ?? []).map(toGameSummary)
 }
 
 /**

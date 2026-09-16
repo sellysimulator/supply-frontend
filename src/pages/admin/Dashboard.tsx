@@ -15,10 +15,9 @@ import { StatTile } from '../../components/charts/StatTile'
 import { HourlyClicksChart } from '../../components/charts/HourlyClicksChart'
 import { TopGamesChart } from '../../components/charts/TopGamesChart'
 import {
-  clicksByGame,
-  clicksInLastHours,
-  hourlySeries,
-  listRecentClicks,
+  listClickTotalsByGame,
+  listHourlyClickSeries,
+  sumLastHours,
   totalClicks,
 } from '../../data/analytics'
 import { listAllGames } from '../../data/games'
@@ -28,14 +27,18 @@ import { useAsync } from '../../hooks/useAsync'
 export default function Dashboard() {
   const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(async () => {
-    const [clicks, games] = await Promise.all([listRecentClicks(30), listAllGames()])
-    return { clicks, games }
+    const [totals, series, games] = await Promise.all([
+      listClickTotalsByGame(30),
+      listHourlyClickSeries(48),
+      listAllGames(),
+    ])
+    return { totals, series, games }
   }, [])
 
   const view = useMemo(() => {
     if (!data) return null
     const names = new Map(data.games.map((game) => [game.id, game.name]))
-    const perGame = clicksByGame(data.clicks).map((row) => ({
+    const perGame = data.totals.map((row) => ({
       ...row,
       // A counter can outlive the entry it belongs to, since counters are never
       // deleted; fall back to the identifier so the row is still readable.
@@ -43,9 +46,11 @@ export default function Dashboard() {
     }))
 
     return {
-      total: totalClicks(data.clicks),
-      last24h: clicksInLastHours(data.clicks, 24),
-      series: hourlySeries(data.clicks, 48),
+      total: totalClicks(data.totals),
+      // The 48-hour series is dense and oldest-first, so the last 24 points
+      // are exactly the last 24 hours.
+      last24h: sumLastHours(data.series, 24),
+      series: data.series,
       perGame,
       topGame: perGame[0] ?? null,
       publishedCount: data.games.filter((game) => game.published).length,
