@@ -101,13 +101,13 @@ export function ImageUploader({
               <img
                 src={image.url}
                 alt=""
-                className="aspect-video w-full rounded-md border border-border object-cover"
+                className="aspect-video w-full rounded-md border border-border bg-surface object-cover"
               />
               <button
                 type="button"
                 onClick={() => void removeImage(image)}
                 aria-label={t('admin.images.remove')}
-                className="absolute top-1.5 right-1.5 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors duration-200 hover:border-destructive hover:text-destructive"
+                className="absolute top-1.5 right-1.5 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground shadow-tile transition-colors duration-200 hover:border-destructive hover:text-destructive"
               >
                 <Trash2 size={14} aria-hidden="true" />
               </button>

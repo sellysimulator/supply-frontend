@@ -3,16 +3,19 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Design tokens — the single source of truth for Selly's visual language.
 
-   Direction: minimal, modern, formal, blue. Flat fills only; there are no
+   Direction: modular, composed, calm. The page is one board of rounded tiles
+   with deliberately uneven spans; depth comes from a soft two-layer shadow and
+   a 2px hover lift, never from a heavy border. Flat fills only — there are no
    gradients anywhere in this application by design. Components reference these
-   tokens through Tailwind utilities (bg-primary, text-muted-foreground, …) and
-   must never hardcode a hex value.
+   tokens through Tailwind utilities (bg-card, text-muted-foreground, shadow-tile,
+   …) and must never hardcode a hex value.
 
    Both themes define the same set of names, so a component is written once and
    works in either. The light palette lives on :root and the dark palette on
-   `.dark`, which ThemeProvider puts on <html>; `@theme inline` maps each
-   Tailwind color onto the variable rather than a copy of its value, so the
-   utilities follow whichever palette is active.
+   `.dark`, which ThemeProvider puts on <html>; `@theme inline` maps each Tailwind
+   token onto the variable rather than a copy of its value, so the utilities follow
+   whichever palette is active. That indirection covers shadows too, because dark
+   mode does not want a softer shadow — it wants a different mechanism entirely.
 
    See design-system/selly/MASTER.md for the reasoning behind these choices.
    ───────────────────────────────────────────────────────────────────────────── */
@@ -21,16 +24,35 @@
    — a reader who chooses a theme must override what their system prefers. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Column spans are generated at runtime from src/lib/bento.ts. That file holds
+   every span class as a literal string so Tailwind's scanner can see it; these
+   lines are belt and braces in case the literal map is ever refactored away. */
+@source inline("lg:col-span-{1..12}");
+@source inline("sm:col-span-{3,6} sm:row-span-2");
+
 @theme inline {
   /* Brand */
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-subtle: var(--primary-subtle);
+  --color-primary-line: var(--primary-line);
   --color-on-primary: var(--on-primary);
+  --color-on-primary-muted: var(--on-primary-muted);
+  --color-on-primary-line: var(--on-primary-line);
 
-  /* Surfaces */
+  /* The featured tile is its own token quadruple, so "what featured looks like"
+     is one decision in one place per theme, and a component can never reach for
+     a text color that has no contrast against the fill. */
+  --color-featured: var(--featured);
+  --color-on-featured: var(--on-featured);
+  --color-on-featured-muted: var(--on-featured-muted);
+  --color-on-featured-line: var(--on-featured-line);
+
+  /* Surfaces, canvas outward: background (the gap between tiles) < card (a tile)
+     < surface (an inset panel inside a tile) < muted (a recessed fill). */
   --color-background: var(--background);
   --color-card: var(--card);
+  --color-surface: var(--surface);
   --color-muted: var(--muted);
   /* Scrim behind modals. A token of its own because it is neither the page nor
      the text color, and it has to darken the page in both themes. */
@@ -42,6 +64,7 @@
 
   /* Lines and focus */
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-ring: var(--ring);
 
   /* Status — used only for state, never as decoration */
@@ -50,16 +73,33 @@
   --color-on-destructive: var(--on-destructive);
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
+
+  /* Depth */
+  --shadow-tile: var(--tile-shadow);
+  --shadow-lift: var(--lift-shadow);
 }
 
 @theme {
-  /* Typography */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Quicksand carries display, Lexend carries everything else. Only Quicksand
+     600 and 700 are loaded, so anything given `font-display` must also carry
+     `font-semibold` or `font-bold` — otherwise the browser synthesises a fake
+     light weight. */
+  --font-sans: 'Lexend', ui-rounded, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Quicksand', ui-rounded, system-ui, sans-serif;
 
-  /* Swiss-minimal geometry: small radii, never pill-shaped */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  /* Bento geometry. The scale is renamed in meaning, not in name, so the ~60
+     existing `rounded-md` / `rounded-lg` call sites become correct for free —
+     and so tailwind-merge, which knows these names natively, keeps resolving a
+     caller's override against a primitive's default. Do not invent a custom
+     radius name: tailwind-merge cannot see it, and both declarations would ship.
+       xs = data marks only · sm = chip · md = inner element · lg = tile */
+  --radius-xs: 0.25rem; /*  4px — chart bars, inline <code>, image crops */
+  --radius-sm: 0.625rem; /* 10px — chips, badges, filter buttons         */
+  --radius-md: 0.75rem; /* 12px — buttons, inputs, icon pads, nav links */
+  --radius-lg: 1.5rem; /* 24px — tiles: Card, Modal, EmptyState        */
+
+  /* The one easing in the system. */
+  --ease-tile: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root {
@@ -67,18 +107,28 @@
 
   --primary: #1d4ed8;
   --primary-hover: #1e40af;
-  --primary-subtle: #eff6ff;
+  --primary-subtle: #e6eefe;
+  --primary-line: #c7d9fd;
   --on-primary: #ffffff;
+  --on-primary-muted: #dbeafe;
+  --on-primary-line: #93b4f5;
 
-  --background: #f8fafc;
+  --featured: var(--primary);
+  --on-featured: var(--on-primary);
+  --on-featured-muted: var(--on-primary-muted);
+  --on-featured-line: var(--on-primary-line);
+
+  --background: #eef2f7;
   --card: #ffffff;
-  --muted: #f1f5f9;
+  --surface: #f4f7fb;
+  --muted: #e9eef5;
   --overlay: rgb(15 23 42 / 0.45);
 
   --foreground: #0f172a;
   --muted-foreground: #475569;
 
   --border: #e2e8f0;
+  --border-strong: #c3cfdf;
   --ring: #1d4ed8;
 
   --destructive: #dc2626;
@@ -86,29 +136,52 @@
   --on-destructive: #ffffff;
   --success: #047857;
   --success-subtle: #ecfdf5;
+
+  --tile-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 8px 24px -12px rgb(15 23 42 / 0.14);
+  --lift-shadow: 0 2px 4px rgb(15 23 42 / 0.06), 0 18px 38px -16px rgb(15 23 42 / 0.2);
 }
 
 /* The dark palette keeps the same single blue and the same flat treatment. The
-   blue lightens, because a mid-blue that is legible on white is not legible on
-   a dark surface, and `on-primary` darkens to keep filled controls above the
-   4.5:1 contrast the design system requires. */
+   blue lightens, because a mid-blue that is legible on white is not legible on a
+   dark surface, and `on-primary` darkens to keep filled controls above the 4.5:1
+   contrast the design system requires.
+
+   Depth works differently here. A soft drop shadow is invisible on a dark canvas,
+   so elevation is carried by three things instead: the canvas is darker than any
+   tile, the hairline brightens on hover, and the shadow is a 1px spread ring plus
+   a deep, tight drop rather than a soft glow.
+
+   If the solid `--featured` fill ever reads as too bright a block against this
+   canvas, the softer alternative is three lines here and nowhere else:
+   `--featured: #16295c; --on-featured: #dbeafe; --on-featured-muted: #8fb4ee;`
+   which still clears 5.5:1. */
 .dark {
   color-scheme: dark;
 
   --primary: #60a5fa;
   --primary-hover: #93c5fd;
-  --primary-subtle: #172554;
+  --primary-subtle: #16295c;
+  --primary-line: #24417f;
   --on-primary: #0b1220;
+  --on-primary-muted: #1a2f5e;
+  --on-primary-line: #2a4d8f;
 
-  --background: #0b1220;
+  --featured: var(--primary);
+  --on-featured: var(--on-primary);
+  --on-featured-muted: var(--on-primary-muted);
+  --on-featured-line: var(--on-primary-line);
+
+  --background: #080d18;
   --card: #111a2c;
-  --muted: #1c2740;
+  --surface: #16203a;
+  --muted: #1f2b46;
   --overlay: rgb(2 6 23 / 0.7);
 
   --foreground: #e8eefc;
-  --muted-foreground: #9fb0cc;
+  --muted-foreground: #a3b4d0;
 
-  --border: #24304a;
+  --border: #26324e;
+  --border-strong: #3a4c74;
   --ring: #60a5fa;
 
   --destructive: #f87171;
@@ -116,6 +189,9 @@
   --on-destructive: #1a0a0a;
   --success: #34d399;
   --success-subtle: #052e24;
+
+  --tile-shadow: 0 0 0 1px rgb(148 163 184 / 0.08), 0 10px 26px -14px rgb(0 0 0 / 0.8);
+  --lift-shadow: 0 0 0 1px rgb(148 163 184 / 0.2), 0 20px 44px -18px rgb(0 0 0 / 0.95);
 }
 
 @layer base {
@@ -132,6 +208,18 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Headings carry the display face globally, so no component has to ask. The
+     weight is pinned because Quicksand ships 600 and 700 only. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
   /* A single, consistent focus ring across every interactive element. Never
      removed — only restyled. */
   :focus-visible {
@@ -139,13 +227,10 @@
     outline-offset: 2px;
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-weight: 600;
-    letter-spacing: -0.011em;
-    text-wrap: balance;
+  /* --ring is the same blue as --featured, so the default ring disappears on a
+     filled tile. Inside one, the ring wears the tile's own text color. */
+  .bg-featured :focus-visible {
+    outline-color: var(--color-on-featured);
   }
 
   /* Motion is subtle by default and disappears entirely for users who ask. */
@@ -157,6 +242,59 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Stretched link: a tile's title covers the whole tile without nesting links.
+     The tile must be `relative`, and any real control inside it `relative z-10`. */
+  .stretched::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  /* Tile depth: 200ms shadow + 2px lift + a stronger hairline. The hairline is
+     what carries the hover in dark mode, where the shadow barely registers. */
+  .tile-hover {
+    transition:
+      box-shadow 200ms var(--ease-tile),
+      transform 200ms var(--ease-tile),
+      border-color 200ms var(--ease-tile);
+  }
+
+  .tile-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--lift-shadow);
+    border-color: var(--color-border-strong);
+  }
+
+  /* The global kill switch in @layer base collapses the transition but not the
+     end state, and a base-layer rule cannot outrank a components-layer one — so
+     the lift is cancelled here, after the rule it cancels. */
+  @media (prefers-reduced-motion: reduce) {
+    .tile-hover:hover {
+      transform: none;
+      box-shadow: var(--tile-shadow);
+    }
+  }
+
+  /* Staggered fade-and-rise on first view. The hidden initial state exists ONLY
+     for readers who accept motion — putting `opacity: 0` outside this query would
+     leave a reduced-motion reader staring at an invisible catalog, because the
+     global kill switch collapses the transition but not the starting state. */
+  @media (prefers-reduced-motion: no-preference) {
+    .tile-enter {
+      transition:
+        opacity 300ms var(--ease-tile),
+        transform 300ms var(--ease-tile);
+    }
+
+    .tile-enter:not(.is-in) {
+      opacity: 0;
+      transform: translateY(12px);
     }
   }
 }

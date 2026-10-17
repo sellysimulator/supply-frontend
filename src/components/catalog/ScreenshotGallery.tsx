@@ -24,7 +24,7 @@ export function ScreenshotGallery({
             <button
               type="button"
               onClick={() => setActive(shot)}
-              className="block w-full cursor-pointer overflow-hidden rounded-md border border-border bg-muted transition-colors duration-200 hover:border-primary"
+              className="tile-hover block w-full cursor-pointer overflow-hidden rounded-md border border-border bg-surface shadow-tile"
             >
               <img
                 src={shot.url}

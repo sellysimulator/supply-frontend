@@ -20,10 +20,11 @@ export function LanguageToggle({ className }: { className?: string }) {
   return (
     <Button
       variant="secondary"
+      shape="pill"
       onClick={() => void i18n.changeLanguage(next)}
       aria-label={t('language.switchAria')}
       title={t('language.switchAria')}
-      className={className ? `px-3 ${className}` : 'px-3'}
+      className={className ? `px-4 ${className}` : 'px-4'}
     >
       <Languages size={18} aria-hidden="true" />
       <span className="text-sm font-medium">{t('language.switchLabel')}</span>

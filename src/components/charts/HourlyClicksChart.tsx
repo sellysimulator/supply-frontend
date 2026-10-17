@@ -84,7 +84,7 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
                         onMouseLeave={() => setHovered(null)}
                       >
                         <div
-                          className="w-full max-w-[18px] rounded-t bg-primary transition-opacity duration-200"
+                          className="w-full max-w-[18px] rounded-t-xs bg-primary transition-opacity duration-200"
                           style={{
                             height: `${Math.max(heightPercent, point.clickCount > 0 ? 2 : 0)}%`,
                             opacity: hovered && hovered !== point ? 0.55 : 1,
@@ -123,7 +123,7 @@ export function HourlyClicksChart({ points }: { points: HourPoint[] }) {
         {hovered && (
           <div
             aria-live="polite"
-            className="pointer-events-none absolute top-0 right-0 rounded-md border border-border bg-card px-3 py-2 text-xs"
+            className="pointer-events-none absolute top-0 right-0 rounded-md border border-border bg-card px-3 py-2 text-xs shadow-lift"
           >
             <p className="font-medium text-foreground">{fullLabel(hovered.hour, locale)}</p>
             <p className="text-muted-foreground tabular-nums">

@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { cn } from '../../lib/cn'
+import { FilterChip } from '../ui'
 
 /**
  * Filters are always visible rather than tucked behind a control — a directory
- * that hides its filters reads as a shorter catalog than it is.
+ * that hides its filters reads as a shorter catalog than it is. The row wraps; it
+ * is never clipped into a horizontal scroller.
  */
 export function CategoryFilter({
   categories,
@@ -24,30 +25,20 @@ export function CategoryFilter({
   ]
 
   return (
-    <div
-      className="flex flex-wrap items-center gap-2"
-      role="group"
-      aria-label={t('catalog.filterLabel')}
-    >
-      {options.map((option) => {
-        const isActive = selected === option.value
-        return (
-          <button
+    <div className="flex flex-col gap-3">
+      <p className="text-xs font-medium tracking-wide text-muted-foreground">
+        {t('catalog.filterHeading')}
+      </p>
+      <div className="flex flex-wrap gap-2" role="group" aria-label={t('catalog.filterLabel')}>
+        {options.map((option) => (
+          <FilterChip
             key={option.key}
-            type="button"
-            aria-pressed={isActive}
-            onClick={() => onSelect(option.value)}
-            className={cn(
-              'inline-flex h-9 cursor-pointer items-center rounded-md border px-3 text-sm font-medium transition-colors duration-200',
-              isActive
-                ? 'border-primary bg-primary text-on-primary'
-                : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary',
-            )}
-          >
-            {option.label}
-          </button>
-        )
-      })}
+            label={option.label}
+            pressed={selected === option.value}
+            onPress={() => onSelect(option.value)}
+          />
+        ))}
+      </div>
     </div>
   )
 }

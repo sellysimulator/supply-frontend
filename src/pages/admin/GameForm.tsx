@@ -131,18 +131,20 @@ export default function GameForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      {/* The save bar is a tile of its own and sticks to the top of the board, so
+          a long form never hides the action that commits it. */}
+      <Card className="sticky top-20 z-30 flex flex-col gap-4 bg-card/90 p-5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <button
             type="button"
             onClick={() => navigate('/admin/games')}
-            className="inline-flex w-fit cursor-pointer items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
+            className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
           >
             <ArrowLeft size={15} aria-hidden="true" />
             {t('admin.form.back')}
           </button>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="font-display text-lg font-semibold text-foreground">
             {isEditing ? t('admin.form.edit', { name: existing?.name ?? '' }) : t('admin.form.add')}
           </h2>
         </div>
@@ -152,7 +154,7 @@ export default function GameForm() {
             ? t('admin.form.saving')
             : t(isEditing ? 'admin.form.saveChanges' : 'admin.form.create')}
         </Button>
-      </div>
+      </Card>
 
       {saveFailed && (
         <p role="alert" className="text-sm font-medium text-destructive">

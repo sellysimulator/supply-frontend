@@ -2,7 +2,16 @@ import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { Check, Copy, LogIn } from 'lucide-react'
-import { Button, Card, CardBody, CardHeader, CardTitle, LoadingSection } from '../components/ui'
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  IconPad,
+  LoadingSection,
+  Surface,
+} from '../components/ui'
 import { PageContainer } from '../components/layout/Layout'
 import { useAuth } from '../auth/useAuth'
 
@@ -56,13 +65,16 @@ export default function SignIn() {
 
   return (
     <PageContainer>
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-6 py-8">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+      <div className="mx-auto flex w-full max-w-lg flex-col gap-4 py-8">
+        <Card className="flex flex-col gap-3 p-6 sm:p-8">
+          <IconPad size="lg">
+            <LogIn size={22} />
+          </IconPad>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-foreground">
             {t('signIn.title')}
           </h1>
-          <p className="text-muted-foreground">{t('signIn.description')}</p>
-        </div>
+          <p className="leading-relaxed text-muted-foreground">{t('signIn.description')}</p>
+        </Card>
 
         {!user && (
           <Card>
@@ -99,7 +111,7 @@ export default function SignIn() {
                   <Trans
                     i18nKey="signIn.grantAccessBody"
                     components={[
-                      <code key="sql" className="rounded-sm bg-muted px-1 py-0.5 text-foreground">
+                      <code key="sql" className="rounded-xs bg-muted px-1 py-0.5 text-foreground">
                         insert into admins (user_id, email) values (&apos;…&apos;, &apos;…&apos;);
                       </code>,
                     ]}
@@ -107,7 +119,7 @@ export default function SignIn() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2">
+              <Surface className="flex items-center gap-2 px-3 py-2">
                 <code className="flex-1 truncate text-xs text-foreground">{user.id}</code>
                 <Button size="sm" variant="secondary" onClick={copyUserId}>
                   {copied ? (
@@ -122,7 +134,7 @@ export default function SignIn() {
                     </>
                   )}
                 </Button>
-              </div>
+              </Surface>
 
               <div>
                 <Button variant="ghost" onClick={() => void signOut()}>

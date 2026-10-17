@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Inbox, TriangleAlert } from 'lucide-react'
 import { Card } from './Card'
+import { IconPad } from './IconPad'
 
 /** Shown when a query succeeds but returns nothing. */
 export function EmptyState({
@@ -13,10 +15,13 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <Card className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-      <p className="text-base font-semibold text-foreground">{title}</p>
+    <Card className="flex flex-col items-center gap-3 px-6 py-14 text-center">
+      <IconPad size="lg">
+        <Inbox size={22} />
+      </IconPad>
+      <p className="font-display text-lg font-semibold text-foreground">{title}</p>
       {description && <p className="max-w-md text-sm text-muted-foreground">{description}</p>}
-      {action && <div className="mt-3">{action}</div>}
+      {action && <div className="mt-2">{action}</div>}
     </Card>
   )
 }
@@ -34,12 +39,15 @@ export function ErrorState({
   const { t } = useTranslation()
 
   return (
-    <Card className="flex flex-col items-center gap-2 border-destructive/30 px-6 py-14 text-center">
-      <p className="text-base font-semibold text-destructive">
+    <Card className="flex flex-col items-center gap-3 border-destructive/30 px-6 py-14 text-center">
+      <IconPad size="lg" tone="muted" className="text-destructive">
+        <TriangleAlert size={22} />
+      </IconPad>
+      <p className="font-display text-lg font-semibold text-destructive">
         {title ?? t('common.somethingWentWrong')}
       </p>
       {description && <p className="max-w-md text-sm text-muted-foreground">{description}</p>}
-      {action && <div className="mt-3">{action}</div>}
+      {action && <div className="mt-2">{action}</div>}
     </Card>
   )
 }

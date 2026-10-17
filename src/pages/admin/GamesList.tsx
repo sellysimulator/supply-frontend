@@ -11,6 +11,7 @@ import {
   ErrorState,
   LoadingSection,
   Modal,
+  SectionHeader,
   Table,
   Td,
   Th,
@@ -59,17 +60,20 @@ export default function GamesList() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-foreground">{t('admin.gamesList.title')}</h2>
-          <p className="text-sm text-muted-foreground">{t('admin.gamesList.description')}</p>
-        </div>
-        <ButtonLink to="/admin/games/new" className="w-fit">
-          <Plus size={16} aria-hidden="true" />
-          {t('admin.gamesList.add')}
-        </ButtonLink>
-      </div>
+    <div className="flex flex-col gap-4">
+      <Card className="p-6">
+        <SectionHeader
+          level={2}
+          title={t('admin.gamesList.title')}
+          description={t('admin.gamesList.description')}
+          actions={
+            <ButtonLink to="/admin/games/new">
+              <Plus size={16} aria-hidden="true" />
+              {t('admin.gamesList.add')}
+            </ButtonLink>
+          }
+        />
+      </Card>
 
       {actionError && (
         <p role="alert" className="text-sm font-medium text-destructive">
@@ -111,7 +115,7 @@ export default function GamesList() {
             </thead>
             <tbody>
               {games.map((game) => (
-                <tr key={game.id}>
+                <tr key={game.id} className="transition-colors duration-200 hover:bg-surface">
                   <Td>
                     <span className="font-medium text-foreground">{game.name}</span>
                     <span className="block max-w-sm truncate text-xs text-muted-foreground">
@@ -119,7 +123,9 @@ export default function GamesList() {
                     </span>
                   </Td>
                   <Td className="hidden sm:table-cell">
-                    <code className="text-xs text-muted-foreground">{game.id}</code>
+                    <code className="rounded-xs bg-muted px-1 py-0.5 text-xs text-muted-foreground">
+                      {game.id}
+                    </code>
                   </Td>
                   <Td>
                     {game.published ? (

@@ -18,9 +18,9 @@ export function TopGamesChart({ rows }: { rows: GameCount[] }) {
               {row.clickCount}
             </span>
           </div>
-          <div className="h-2 w-full rounded-sm bg-muted">
+          <div className="h-2 w-full rounded-xs bg-muted">
             <div
-              className="h-2 rounded-sm bg-primary"
+              className="h-2 rounded-xs bg-primary"
               style={{ width: `${(row.clickCount / max) * 100}%` }}
             />
           </div>

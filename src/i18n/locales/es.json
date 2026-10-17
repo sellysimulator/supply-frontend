@@ -16,7 +16,8 @@
     "admin": "Administración",
     "homeAria": "Selly — inicio",
     "openMenu": "Abrir el menú",
-    "closeMenu": "Cerrar el menú"
+    "closeMenu": "Cerrar el menú",
+    "browse": "Ver el catálogo"
   },
   "theme": {
     "toDark": "Cambiar al tema oscuro",
@@ -29,7 +30,9 @@
   "footer": {
     "label": "Pie de página",
     "tagline": "Un catálogo de juegos y simulaciones educativas sobre cadenas de suministro.",
-    "terms": "Términos y condiciones"
+    "terms": "Términos y condiciones",
+    "linksHeading": "Enlaces",
+    "disclaimer": "Selly lista estos juegos. No los aloja ni los ejecuta."
   },
   "landing": {
     "eyebrow": "Educación en cadena de suministro",
@@ -58,6 +61,12 @@
       "viewAll": "Ver todos",
       "loading": "Cargando los juegos",
       "empty": "Todavía no se ha publicado ningún juego. Vuelva a consultarlo pronto."
+    },
+    "stats": {
+      "heading": "Selly en cifras",
+      "gamesLabel": "juegos en el catálogo",
+      "durationLabel": "minutos por sesión",
+      "playersLabel": "jugadores"
     }
   },
   "about": {
@@ -85,7 +94,8 @@
       "title": "Empiece por el catálogo",
       "body": "Explore todo lo publicado, filtre por categoría y abra la ficha de un juego para ver en qué consiste una sesión.",
       "action": "Explorar el catálogo"
-    }
+    },
+    "ctaBadge": "Empiece aquí"
   },
   "catalog": {
     "title": "Catálogo",
@@ -106,7 +116,9 @@
     "empty": {
       "title": "El catálogo está vacío",
       "description": "Los juegos aparecerán aquí en cuanto se publiquen."
-    }
+    },
+    "filterHeading": "Filtrar por categoría",
+    "clearFilter": "Quitar filtro"
   },
   "game": {
     "moreDetails": "Más detalles",
@@ -119,7 +131,9 @@
     "playerRange": "{{min}}–{{max}} jugadores",
     "durationMinutes": "{{count}} min",
     "durationHours": "{{count}} h",
-    "durationHoursMinutes": "{{hours}} h {{minutes}} min"
+    "durationHoursMinutes": "{{hours}} h {{minutes}} min",
+    "featured": "Destacado",
+    "featuredAria": "Destacado — {{name}}"
   },
   "details": {
     "loading": "Cargando el juego",
@@ -181,7 +195,8 @@
       "hourlyEmpty": "Todavía no se ha registrado ninguna apertura.",
       "perGameTitle": "Aperturas por juego, últimos 30 días",
       "perGameEmptyTitle": "Todavía no hay nada que mostrar",
-      "perGameEmptyDescription": "Las aperturas aparecerán aquí en cuanto las visitas empiecen a abrir juegos desde el catálogo."
+      "perGameEmptyDescription": "Las aperturas aparecerán aquí en cuanto las visitas empiecen a abrir juegos desde el catálogo.",
+      "overviewHeading": "Resumen"
     },
     "chart": {
       "hourlyAlt": "Aperturas de juegos por hora durante las últimas {{hours}} horas. {{total}} aperturas en total, con un máximo de {{peak}}.",

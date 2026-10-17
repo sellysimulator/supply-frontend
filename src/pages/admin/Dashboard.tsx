@@ -4,14 +4,13 @@ import { BarChart3, LibraryBig, MousePointerClick, TrendingUp } from 'lucide-rea
 import {
   Button,
   Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
   EmptyState,
   ErrorState,
   LoadingSection,
+  SectionHeader,
+  Stat,
 } from '../../components/ui'
-import { StatTile } from '../../components/charts/StatTile'
+import { BentoGrid, BentoItem } from '../../components/layout/BentoGrid'
 import { HourlyClicksChart } from '../../components/charts/HourlyClicksChart'
 import { TopGamesChart } from '../../components/charts/TopGamesChart'
 import {
@@ -76,71 +75,81 @@ export default function Dashboard() {
   if (!view) return null
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-foreground">{t('admin.dashboard.title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('admin.dashboard.description')}</p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <Card className="p-6">
+        <SectionHeader
+          level={2}
+          eyebrow={t('admin.dashboard.overviewHeading')}
+          title={t('admin.dashboard.title')}
+          description={t('admin.dashboard.description')}
+        />
+      </Card>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile
-          label={t('admin.dashboard.launches30d')}
-          value={view.total.toLocaleString()}
-          icon={<MousePointerClick size={16} aria-hidden="true" />}
-        />
-        <StatTile
-          label={t('admin.dashboard.launches24h')}
-          value={view.last24h.toLocaleString()}
-          icon={<TrendingUp size={16} aria-hidden="true" />}
-        />
-        <StatTile
-          label={t('admin.dashboard.mostLaunched')}
-          value={view.topGame ? view.topGame.name : '—'}
-          hint={
-            view.topGame
+      <BentoGrid>
+        {[
+          {
+            label: t('admin.dashboard.launches30d'),
+            value: view.total.toLocaleString(),
+            icon: <MousePointerClick size={16} aria-hidden="true" />,
+          },
+          {
+            label: t('admin.dashboard.launches24h'),
+            value: view.last24h.toLocaleString(),
+            icon: <TrendingUp size={16} aria-hidden="true" />,
+          },
+          {
+            label: t('admin.dashboard.mostLaunched'),
+            value: view.topGame ? view.topGame.name : '—',
+            hint: view.topGame
               ? t('admin.dashboard.launchCount', { count: view.topGame.clickCount })
-              : t('admin.dashboard.noLaunchesYet')
-          }
-          icon={<BarChart3 size={16} aria-hidden="true" />}
-        />
-        <StatTile
-          label={t('admin.dashboard.publishedGames')}
-          value={view.publishedCount}
-          hint={t('admin.dashboard.entryCount', { count: view.totalGames })}
-          icon={<LibraryBig size={16} aria-hidden="true" />}
-        />
-      </div>
+              : t('admin.dashboard.noLaunchesYet'),
+            icon: <BarChart3 size={16} aria-hidden="true" />,
+          },
+          {
+            label: t('admin.dashboard.publishedGames'),
+            value: view.publishedCount,
+            hint: t('admin.dashboard.entryCount', { count: view.totalGames }),
+            icon: <LibraryBig size={16} aria-hidden="true" />,
+          },
+        ].map((tile, index) => (
+          <BentoItem key={tile.label} span={3} index={index} className="sm:col-span-3">
+            <Card className="h-full p-5">
+              <Stat label={tile.label} value={tile.value} hint={tile.hint} icon={tile.icon} />
+            </Card>
+          </BentoItem>
+        ))}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('admin.dashboard.hourlyTitle')}</CardTitle>
-        </CardHeader>
-        <CardBody>
-          {view.total === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {t('admin.dashboard.hourlyEmpty')}
-            </p>
-          ) : (
-            <HourlyClicksChart points={view.series} />
-          )}
-        </CardBody>
-      </Card>
+        <BentoItem span={12} index={4} className="sm:col-span-6">
+          <Card className="p-6">
+            <SectionHeader level={3} title={t('admin.dashboard.hourlyTitle')} />
+            <div className="mt-4">
+              {view.total === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  {t('admin.dashboard.hourlyEmpty')}
+                </p>
+              ) : (
+                <HourlyClicksChart points={view.series} />
+              )}
+            </div>
+          </Card>
+        </BentoItem>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('admin.dashboard.perGameTitle')}</CardTitle>
-        </CardHeader>
-        <CardBody>
-          {view.perGame.length === 0 ? (
-            <EmptyState
-              title={t('admin.dashboard.perGameEmptyTitle')}
-              description={t('admin.dashboard.perGameEmptyDescription')}
-            />
-          ) : (
-            <TopGamesChart rows={view.perGame} />
-          )}
-        </CardBody>
-      </Card>
+        <BentoItem span={12} index={5} className="sm:col-span-6">
+          <Card className="p-6">
+            <SectionHeader level={3} title={t('admin.dashboard.perGameTitle')} />
+            <div className="mt-4">
+              {view.perGame.length === 0 ? (
+                <EmptyState
+                  title={t('admin.dashboard.perGameEmptyTitle')}
+                  description={t('admin.dashboard.perGameEmptyDescription')}
+                />
+              ) : (
+                <TopGamesChart rows={view.perGame} />
+              )}
+            </div>
+          </Card>
+        </BentoItem>
+      </BentoGrid>
     </div>
   )
 }

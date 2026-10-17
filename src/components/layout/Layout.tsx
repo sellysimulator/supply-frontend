@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Card, SectionHeader } from '../ui'
 import { Footer } from './Footer'
 import { Header } from './Header'
 
@@ -11,7 +12,7 @@ export function Layout() {
     <div className="flex min-h-screen flex-col">
       <a
         href="#main"
-        className="sr-only rounded-md bg-primary px-4 py-2 text-on-primary focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+        className="sr-only rounded-md bg-primary px-4 py-2 text-on-primary shadow-tile focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
       >
         {t('common.skipToContent')}
       </a>
@@ -24,7 +25,11 @@ export function Layout() {
   )
 }
 
-/** Standard page padding, so no page invents its own container. */
+/**
+ * Standard page padding, so no page invents its own container. The board wants
+ * 1280px, and the tiles carry their own vertical rhythm through the grid gap —
+ * which is why the vertical padding is smaller than the old flat layout's.
+ */
 export function PageContainer({
   children,
   className,
@@ -33,31 +38,50 @@ export function PageContainer({
   className?: string
 }) {
   return (
-    <div className={`mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 ${className ?? ''}`}>
+    <div className={`mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${className ?? ''}`}>
       {children}
     </div>
   )
 }
 
-/** Consistent page heading block across public and admin pages. */
+/**
+ * Every page opens with a header tile rather than a bare heading row, so the
+ * first thing on the board is part of the board.
+ */
 export function PageHeading({
   title,
   description,
+  eyebrow,
   actions,
+  aside,
+  children,
 }: {
   title: string
   description?: string
+  eyebrow?: string
   actions?: React.ReactNode
+  /** A live count or status chip, shown at the end of the heading row. */
+  aside?: React.ReactNode
+  /** Filter chips or controls, on their own row below the heading. */
+  children?: React.ReactNode
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          {title}
-        </h1>
-        {description && <p className="max-w-2xl text-muted-foreground">{description}</p>}
-      </div>
-      {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
-    </div>
+    <Card className="mb-4 p-6 sm:p-8">
+      <SectionHeader
+        level={1}
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
+        actions={
+          actions || aside ? (
+            <>
+              {aside}
+              {actions}
+            </>
+          ) : undefined
+        }
+      />
+      {children && <div className="mt-6">{children}</div>}
+    </Card>
   )
 }

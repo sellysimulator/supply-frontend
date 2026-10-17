@@ -12,7 +12,9 @@
  * carries no VITE_ prefix, so Vite never places it in a browser bundle.
  *
  * Existing entries are left alone unless --force is passed, so re-running will
- * not overwrite edits made in the portal.
+ * not overwrite edits made in the portal. seed-games.json carries no thumbnail
+ * or screenshots, so --force only replaces text and never resets images; those
+ * are loaded with publish-catalog-media.mjs (npm run seed:media).
  */
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'

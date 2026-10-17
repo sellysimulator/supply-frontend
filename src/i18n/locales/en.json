@@ -16,7 +16,8 @@
     "admin": "Admin",
     "homeAria": "Selly — home",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "browse": "Browse the catalog"
   },
   "theme": {
     "toDark": "Switch to dark theme",
@@ -29,7 +30,9 @@
   "footer": {
     "label": "Footer",
     "tagline": "A catalog of educational supply chain games and simulations.",
-    "terms": "Terms and Conditions"
+    "terms": "Terms and Conditions",
+    "linksHeading": "Links",
+    "disclaimer": "Selly lists these games. It does not host or run them."
   },
   "landing": {
     "eyebrow": "Supply chain education",
@@ -58,6 +61,12 @@
       "viewAll": "View all",
       "loading": "Loading games",
       "empty": "No games have been published yet. Please check back soon."
+    },
+    "stats": {
+      "heading": "Selly in numbers",
+      "gamesLabel": "games in the catalog",
+      "durationLabel": "minutes per session",
+      "playersLabel": "players"
     }
   },
   "about": {
@@ -85,7 +94,8 @@
       "title": "Start with the catalog",
       "body": "Browse everything currently published, filter by category, and open a game's details to see what a session involves.",
       "action": "Browse the catalog"
-    }
+    },
+    "ctaBadge": "Start here"
   },
   "catalog": {
     "title": "Catalog",
@@ -106,7 +116,9 @@
     "empty": {
       "title": "The catalog is empty",
       "description": "Games will appear here once they have been published."
-    }
+    },
+    "filterHeading": "Filter by category",
+    "clearFilter": "Clear filter"
   },
   "game": {
     "moreDetails": "More details",
@@ -119,7 +131,9 @@
     "playerRange": "{{min}}–{{max}} players",
     "durationMinutes": "{{count}} min",
     "durationHours": "{{count}} h",
-    "durationHoursMinutes": "{{hours}} h {{minutes}} min"
+    "durationHoursMinutes": "{{hours}} h {{minutes}} min",
+    "featured": "Featured",
+    "featuredAria": "Featured — {{name}}"
   },
   "details": {
     "loading": "Loading game",
@@ -181,7 +195,8 @@
       "hourlyEmpty": "No launches have been recorded yet.",
       "perGameTitle": "Launches per game, last 30 days",
       "perGameEmptyTitle": "Nothing to report yet",
-      "perGameEmptyDescription": "Game launches will appear here once visitors start opening games from the catalog."
+      "perGameEmptyDescription": "Game launches will appear here once visitors start opening games from the catalog.",
+      "overviewHeading": "Overview"
     },
     "chart": {
       "hourlyAlt": "Game launches per hour over the last {{hours}} hours. {{total}} launches in total, peaking at {{peak}}.",

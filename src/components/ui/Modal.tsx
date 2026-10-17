@@ -65,12 +65,12 @@ export function Modal({
         aria-label={title}
         tabIndex={-1}
         className={cn(
-          'flex max-h-[90vh] w-full max-w-2xl flex-col rounded-t-lg border border-border bg-card sm:rounded-lg',
+          'flex max-h-[90vh] w-full max-w-2xl flex-col rounded-t-lg border border-border bg-card shadow-lift sm:rounded-lg',
           className,
         )}
       >
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+          <h2 className="font-display text-base font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={onClose}

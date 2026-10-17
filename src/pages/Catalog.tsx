@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, EmptyState, ErrorState, LoadingSection } from '../components/ui'
+import { Badge, Button, EmptyState, ErrorState, LoadingSection } from '../components/ui'
 import { PageContainer, PageHeading } from '../components/layout/Layout'
+import { BentoGrid, BentoItem } from '../components/layout/BentoGrid'
 import { CategoryFilter } from '../components/catalog/CategoryFilter'
 import { GameCard } from '../components/catalog/GameCard'
+import { computeSpans } from '../lib/bento'
 import { listPublishedGames } from '../data/games'
 import { useAsync } from '../hooks/useAsync'
 
@@ -25,9 +27,32 @@ export default function Catalog() {
     return category ? games.filter((game) => game.categories.includes(category)) : games
   }, [games, category])
 
+  /* Recomputed on every filter, so the last row always closes the board. */
+  const spans = useMemo(() => computeSpans(visible.length), [visible.length])
+
+  const count = category
+    ? t('catalog.countInCategory', { count: visible.length, category })
+    : t('catalog.count', { count: visible.length })
+
   return (
     <PageContainer>
-      <PageHeading title={t('catalog.title')} description={t('catalog.description')} />
+      <PageHeading
+        title={t('catalog.title')}
+        description={t('catalog.description')}
+        aside={
+          games && !loading && !error ? (
+            <p aria-live="polite">
+              <Badge tone="neutral" className="tabular-nums">
+                {count}
+              </Badge>
+            </p>
+          ) : undefined
+        }
+      >
+        {games && !loading && !error && (
+          <CategoryFilter categories={categories} selected={category} onSelect={setCategory} />
+        )}
+      </PageHeading>
 
       {loading && <LoadingSection label={t('catalog.loading')} />}
 
@@ -42,42 +67,39 @@ export default function Catalog() {
         />
       )}
 
-      {games && !loading && !error && (
-        <div className="flex flex-col gap-6">
-          <CategoryFilter categories={categories} selected={category} onSelect={setCategory} />
-
-          {visible.length === 0 ? (
-            <EmptyState
-              title={t(category ? 'catalog.emptyCategory.title' : 'catalog.empty.title')}
-              description={t(
-                category ? 'catalog.emptyCategory.description' : 'catalog.empty.description',
-              )}
-              action={
-                category ? (
-                  <Button variant="secondary" onClick={() => setCategory(null)}>
-                    {t('catalog.emptyCategory.action')}
-                  </Button>
-                ) : undefined
-              }
-            />
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground" aria-live="polite">
-                {category
-                  ? t('catalog.countInCategory', { count: visible.length, category })
-                  : t('catalog.count', { count: visible.length })}
-              </p>
-              <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {visible.map((game) => (
-                  <li key={game.id}>
-                    <GameCard game={game} />
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      )}
+      {games &&
+        !loading &&
+        !error &&
+        (visible.length === 0 ? (
+          <EmptyState
+            title={t(category ? 'catalog.emptyCategory.title' : 'catalog.empty.title')}
+            description={t(
+              category ? 'catalog.emptyCategory.description' : 'catalog.empty.description',
+            )}
+            action={
+              category ? (
+                <Button variant="secondary" onClick={() => setCategory(null)}>
+                  {t('catalog.emptyCategory.action')}
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <BentoGrid as="ul">
+            {visible.map((game, index) => (
+              <BentoItem
+                as="li"
+                key={game.id}
+                span={spans[index] ?? 4}
+                index={index}
+                featured={index === 0}
+                rowSpan
+              >
+                <GameCard game={game} featured={index === 0} />
+              </BentoItem>
+            ))}
+          </BentoGrid>
+        ))}
     </PageContainer>
   )
 }

@@ -2,25 +2,107 @@
   {
     "id": "selly",
     "name": "Tequila Game",
-    "short_description": "A real-time multiplayer supply chain simulator inspired by the Beer Game.",
-    "full_description": "Tequila Game puts a small group in charge of consecutive stages of a supply chain and asks each player to decide, round after round, how much to order from the stage upstream.\n\nBecause orders take time to arrive and nobody can see the whole chain at once, small swings in customer demand grow into large swings in factory output — the bullwhip effect, experienced rather than described. Sessions are hosted in rooms: one player creates the room and shares the code, the rest join, and the simulation runs in real time until the final round.\n\nThe debrief is where the learning lands. Cost curves for every stage are shown side by side, so a group can see exactly where inventory piled up, where a stockout started, and how a single cautious over-order propagated backwards through the chain.",
+    "short_description": "A real-time market game: retailers compete for one supplier's limited stock and choose how to ship it, trading cost against CO₂.",
+    "full_description": "Tequila Game puts players side by side as retailers competing for the stock of one supplier whose capacity changes every week. Each week everyone decides at the same time how much to order, which vehicle carries it (a van, a truck or a Thorton, each with its own fixed cost, per-unit cost and emissions), whether to share transport with other players, whether to split the supplier's stock in proportion to orders, and whether to buy from or sell to the other retailers.\n\nThe host sets the rules of the market before the game starts: the number of players and weeks, supply and demand ranges, storage cost and backlog penalty, the chance of a supplier failure or a transport loss, a demand bonus for the lowest-cost player from a chosen round, the transport fleet itself, and whether players see a first-person 3D warehouse.\n\nCharts follow unit cost, emissions, inventory and backlog, and market share week by week. At the end, the summary compares how often each player shared vehicles and split supply, the emissions and demand for every week, and the final scores.",
     "learning_objectives": [
-      "Experience the bullwhip effect first-hand rather than in the abstract",
-      "Reason about how information delay distorts ordering decisions",
-      "Weigh the cost of holding inventory against the cost of a stockout",
-      "Recognise how local optimisation harms overall supply chain performance"
+      "Decide how much to order when a shared supplier cannot meet every order",
+      "Weigh transport cost against emissions when choosing and sharing vehicles",
+      "Balance the cost of holding inventory against the penalty for backlog",
+      "Adjust a strategy week by week against competing retailers"
     ],
-    "audience": "Undergraduate and graduate operations students",
+    "audience": "Undergraduate and graduate operations, logistics and sustainability students",
     "min_players": 2,
     "max_players": 8,
     "duration_minutes": 60,
     "categories": ["Simulation", "Multiplayer"],
-    "tags": ["beer game", "bullwhip effect", "inventory", "real-time"],
-    "resources": [],
-    "thumbnail": null,
-    "screenshots": [],
+    "tags": ["inventory", "transport", "emissions", "competition", "3D", "real-time"],
+    "resources": [
+      {
+        "label": "Player manual",
+        "url": "https://sellysim.web.app/player-manual"
+      },
+      {
+        "label": "Host manual",
+        "url": "https://sellysim.web.app/host-manual"
+      }
+    ],
     "launch_url": "https://sellysim.web.app",
     "published": true,
     "sort_order": 0
+  },
+  {
+    "id": "beer-game",
+    "name": "Beer Game",
+    "short_description": "The MIT Beer Distribution Game in the browser, with a host console, bots for empty seats and an automatic bullwhip debrief.",
+    "full_description": "Four roles, the Retailer, Wholesaler, Distributor and Factory, each run one link of a beer supply chain. Every week each of them makes a single decision: how much to order from the next link upstream. Orders take weeks to arrive and only the Retailer sees real customer demand, so a small change in demand grows as it travels up the chain. That growth is the bullwhip effect.\n\nThe host opens a room, shares the code, and can fill any empty seat with a bot. The game comes with three presets (Classic MIT, Fast Game and Chaos) and lets the host set the demand pattern, delays, starting stock, costs and what each role is allowed to see. During play, a live console shows the whole chain, and a presentation mode puts it on the projector without revealing anyone's costs or orders.\n\nThe results page plots true demand against every role's orders and reports the bullwhip ratio, fill rate and cost for each role and for the chain. Results can be exported as CSV or JSON.",
+    "learning_objectives": [
+      "Experience the bullwhip effect first-hand and measure it",
+      "Explain how delays and limited visibility distort ordering decisions",
+      "Account for the supply line, not just stock on hand, when ordering",
+      "Compare local and chain-wide costs in a structured debrief"
+    ],
+    "audience": "Undergraduate and graduate operations and supply chain students",
+    "min_players": 1,
+    "max_players": 4,
+    "duration_minutes": 60,
+    "categories": ["Simulation", "Multiplayer"],
+    "tags": ["beer game", "bullwhip effect", "inventory", "classic", "debrief", "3D"],
+    "resources": [
+      {
+        "label": "Player manual",
+        "url": "https://beersim.web.app/player-manual"
+      },
+      {
+        "label": "Host manual",
+        "url": "https://beersim.web.app/host-manual"
+      }
+    ],
+    "launch_url": "https://beersim.web.app",
+    "published": true,
+    "sort_order": 1
+  },
+  {
+    "id": "lemonade-game",
+    "name": "Lemonade Game",
+    "short_description": "Run a lemonade stand: buy ingredients, set a recipe and a price, then watch every customer walk up and decide.",
+    "full_description": "Lemony is a single-player business game played one day at a time. Each morning you see the weather and temperature, buy ice, sugar, lemons and cups in packs (bigger packs cost less per unit), set how much of each goes into a cup, and choose a price.\n\nThen the stand opens. Children, teenagers, adults and seniors walk past in a 2D or 3D street. Each type has its own taste, budget, favourite hour and favourite weather, and each customer decides on the spot whether to buy. A live feed gives the reason for every decision. Ingredients spoil over time, stock is used first in, first out, and your popularity carries over to the next day.\n\nAfter each day a report shows customers by hour, what spoiled overnight and why people said no. At the end, eight charts sum up the whole game. Every rule of the world can be changed before you start, from customer preferences to shelf life, and each setting comes with an explanation.",
+    "learning_objectives": [
+      "Set a price against what different customers are willing to pay",
+      "Plan purchases around demand, bulk discounts and spoilage",
+      "Read a daily report to find out why a sale did or did not happen",
+      "See how reputation builds from day to day"
+    ],
+    "audience": "High school and undergraduate business students, and self-learners",
+    "min_players": 1,
+    "max_players": 1,
+    "duration_minutes": 20,
+    "categories": ["Simulation", "Single player"],
+    "tags": ["pricing", "demand", "inventory", "spoilage", "small business", "3D"],
+    "resources": [],
+    "launch_url": "https://lemonysim.web.app",
+    "published": true,
+    "sort_order": 2
+  },
+  {
+    "id": "pulque-game",
+    "name": "Pulque Game",
+    "short_description": "Run a pulquería in a live market: buy spot or futures, insure shipments and trade with rivals before the pulque spoils.",
+    "full_description": "Every player runs a pulquería in the same town, and all of them buy from one supplier. Pulque spoils, so timing is everything. Each day every player makes one submission: a spot order at today's price, a futures order at a locked price delivered a week later, a shipping tier from EXW to DDP that decides who carries the risk of losses on the way, which lots to conserve, and limits for buying from or selling to the other pulquerías. Players can also vote for equal supply; if everyone agrees, the supplier's stock is shared evenly.\n\nDemand builds through the week to a Thursday–Saturday peak and is shared out by reputation, which falls with backlog and spoilage. Supplier disruptions, refrigeration failures and nightly spoilage keep the plan honest. Purchases can never exceed the cash on hand.\n\nThe host follows every pulquería from a live console and can switch to a presentation view that shows only public data. At the end, the host reveals the leaderboard, and the debrief shows demand against supply, where every unit of pulque went, the key ratios and each player's decisions. The data can be exported as CSV or JSON.",
+    "learning_objectives": [
+      "Manage a perishable product where time in stock destroys value",
+      "Choose between spot and futures buying under price and supply risk",
+      "Compare who carries transport risk under EXW, CIP, DAP and DDP terms",
+      "Weigh cooperation against competition for a scarce supplier"
+    ],
+    "audience": "Undergraduate and graduate supply chain, procurement and international trade students",
+    "min_players": 2,
+    "max_players": 12,
+    "duration_minutes": 60,
+    "categories": ["Simulation", "Multiplayer"],
+    "tags": ["perishables", "futures", "incoterms", "spoilage", "reputation", "cooperation"],
+    "resources": [],
+    "launch_url": "https://pulkysim.web.app",
+    "published": true,
+    "sort_order": 3
   }
 ]

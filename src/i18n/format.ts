@@ -28,3 +28,11 @@ export function durationLabel(t: Translate, minutes: number): string {
     ? t('game.durationHours', { count: hours })
     : t('game.durationHoursMinutes', { hours, minutes: rest })
 }
+
+/**
+ * A numeric range as one label. Collapses to a single figure when both ends
+ * match, so a stat tile never reads "1–1".
+ */
+export function rangeLabel(min: number, max: number): string {
+  return min === max ? String(min) : `${min}–${max}`
+}

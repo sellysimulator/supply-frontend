@@ -16,10 +16,12 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <Button
       variant="secondary"
+      shape="pill"
+      size="icon"
       onClick={toggleTheme}
       aria-label={t(goingDark ? 'theme.toDark' : 'theme.toLight')}
       title={t(goingDark ? 'theme.toDark' : 'theme.toLight')}
-      className={className ? `w-11 px-0 ${className}` : 'w-11 px-0'}
+      className={className}
     >
       {goingDark ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
     </Button>

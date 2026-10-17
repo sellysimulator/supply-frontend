@@ -58,7 +58,7 @@ export function TagInput({
         <ul className="flex flex-wrap gap-1.5">
           {value.map((entry) => (
             <li key={entry}>
-              <span className="inline-flex items-center gap-1 rounded-sm border border-border bg-muted py-0.5 pr-1 pl-2 text-xs text-foreground">
+              <span className="inline-flex items-center gap-1 rounded-sm border border-border bg-surface py-1 pr-1 pl-2.5 text-xs font-medium text-foreground">
                 {entry}
                 <button
                   type="button"

@@ -8,6 +8,11 @@ understand what it teaches, and open it.
 developed and deployed application with its own frontend, backend, data and
 release cycle. Selly stores only the catalog metadata and the launch URL.
 
+> **Name vs. folder.** This directory is still called `Novus/Supply`; the product
+> inside it is **Selly**. The sibling folder `Novus/Selly` is a different
+> application (the Tequila Game) and has nothing to do with this one. The folder
+> rename is a pending manual step — see `../rebranding-steps.md`.
+
 ## Architecture
 
 A static React bundle talking directly to Supabase from the browser. There is no
@@ -23,11 +28,18 @@ Selly
 └── Protected admin portal
 ```
 
+**Firebase is hosting only** — no Firestore, no Firebase Auth, Functions or
+Firebase Storage. Data, authentication and file storage are all Supabase. (The
+vendored Firebase agent skills under `.claude/skills/` are tooling, not part of
+this app's architecture.)
+
 Because there is no server, **row level security is the authorization**. Hiding
 the admin interface is not a control; the policies in `supabase/migrations/` are,
 and `supabase/verify.sql` proves they hold.
 
 ## Getting started
+
+Node 22.14+, 24, or 26+ (the `engines` range in `package.json`; CI uses Node 24).
 
 ```bash
 npm install
@@ -98,7 +110,22 @@ npm run seed
 
 It reads `VITE_SUPABASE_URL` and `SUPABASE_SECRET_KEY` from `.env`, so a
 filled-in `.env` is all it needs. Existing entries are skipped unless `--force`
-is passed.
+is passed. The entries carry no `thumbnail` or `screenshots`, so even `--force`
+never touches an entry's images.
+
+Images are loaded separately, from one folder per game. `00-thumbnail.*`
+becomes the thumbnail, and every other image becomes a screenshot, in file-name
+order:
+
+```bash
+npm run seed:media -- selly="../Marketing/ShowcaseMedia/Tequila Game/Catalog" --dry-run
+npm run seed:media -- selly="../Marketing/ShowcaseMedia/Tequila Game/Catalog"
+```
+
+The entry must exist first. Files are stored under `games/<id>/`, and each file
+name includes a hash of its content. Re-running with the same images rewrites
+the same objects, and a changed image gets a new URL instead of a stale cached
+one. Images that the entry no longer points at are deleted afterwards.
 
 The secret key bypasses row level security. It is read in Node only, and its
 name has no `VITE_` prefix, so Vite never compiles it into a browser bundle.
@@ -172,7 +199,10 @@ ceiling and adapt to it.
 The visual language — tokens, type, spacing and the rules that keep it
 consistent — is recorded in `design-system/selly/MASTER.md`. In short:
 minimal and formal, a single blue, flat fills with **no gradients anywhere**,
-Inter, hairline borders instead of shadows, and SVG icons rather than emoji.
+Lexend for body text with Quicksand for headings (only Quicksand 600 and 700 are
+loaded, so anything set in the display face is also semibold or bold), rounded
+tiles lifted off the canvas by a soft two-layer shadow, and SVG icons rather
+than emoji.
 
 Every color lives as a token in `src/index.css`; components reference tokens
 through Tailwind utilities and never hardcode a hex value. UI is composed from
@@ -188,6 +218,11 @@ text-foreground` works in both themes without `dark:` variants. An inline script
 in `index.html` applies the remembered theme before the first paint, so there is
 no flash of the wrong one.
 
+Depth is not the same mechanism in both. In light mode a tile casts a soft
+two-layer shadow; in dark mode a soft shadow is invisible, so the canvas sits
+darker than any tile, the shadow becomes a 1px ring plus a tight drop, and the
+hairline brightens on hover.
+
 ### Languages
 
 The interface is available in English and Spanish, chosen from the header and
@@ -196,12 +231,38 @@ asks for. Every string lives in `src/i18n/locales/en.json` and `es.json`, and a
 unit test fails the build if the two files stop carrying the same keys, so a
 missing translation cannot slip through as a silent fallback to English.
 
+## Project layout
+
+```
+src/
+  components/ui/   the primitive layer every page composes from
+  components/      layout, catalog, charts, admin
+  pages/           one file per route; pages/admin/ is lazy-loaded
+  data/            every Supabase read and write
+  supabase/        the client and the row types
+  i18n/            i18next setup and locales/{en,es}.json
+  theme/ auth/ hooks/ lib/ types/
+  __tests__/       all tests live here, not beside the code
+supabase/          migrations and verify.sql — SQL only, applied by hand
+design-system/selly/MASTER.md   the visual spec
+scripts/           the seed loader and its JSON
+```
+
+Four rules are easy to break and worth stating here: never call Supabase from a
+component (add a function to `src/data/`), never hardcode a color (every color
+is a token in `src/index.css`, reached through a Tailwind utility), no gradients
+anywhere, and every visible string goes into both `en.json` and `es.json`.
+
+`CLAUDE.md` is the detailed map of the codebase — module by module, with the
+conventions and the reasoning behind them. This file stays the operator's
+manual: setting the project up, running it, and deploying it.
+
 ## Testing
 
 ```bash
-npm test    # 74 unit tests — summing, schema, pages, components, data layer,
-            #   translation key parity, theme switching, untrusted-name escaping,
-            #   content-security-policy hash
+npm test    # 81 unit tests in 13 files — summing, schema, pages, components,
+            #   data layer, translation key parity, the theme and language
+            #   toggles, untrusted-name escaping, content-security-policy hash
 ```
 
 The access rules are not covered by these: they run inside Postgres, so they are
@@ -217,4 +278,9 @@ The site is a static bundle on Firebase Hosting (the free tier, no billing
 account required). `npm run deploy` builds and deploys it. The GitHub workflows
 in `.github/workflows/` do the same on push and on pull requests; they need
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository secrets,
-because those values are compiled into the bundle at build time.
+because those values are compiled into the bundle at build time (plus a Firebase
+service account).
+
+The Firebase project (`supply-739a5`) and hosting site (`supply-catalog`) keep
+the pre-rebrand name deliberately: a Firebase project id cannot be renamed. See
+`../rebranding-steps.md`.
