@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Eye, EyeOff, Pencil, Plus, Star, Trash2 } from 'lucide-react'
 import {
   Badge,
   Button,
@@ -16,7 +16,7 @@ import {
   Td,
   Th,
 } from '../../components/ui'
-import { deleteGame, listAllGames, setGamePublished } from '../../data/games'
+import { deleteGame, listAllGames, setFeaturedGame, setGamePublished } from '../../data/games'
 import type { Game } from '../../types/game'
 import { useAsync } from '../../hooks/useAsync'
 
@@ -36,6 +36,25 @@ export default function GamesList() {
     } catch {
       setActionError(
         t(game.published ? 'admin.gamesList.unpublishFailed' : 'admin.gamesList.publishFailed', {
+          name: game.name,
+        }),
+      )
+    } finally {
+      setPendingId(null)
+    }
+  }
+
+  /* Featuring a game replaces whichever one was featured before; featuring the
+     current one again clears the choice. */
+  const toggleFeatured = async (game: Game) => {
+    setPendingId(game.id)
+    setActionError(null)
+    try {
+      await setFeaturedGame(game.featured ? null : game.id)
+      reload()
+    } catch {
+      setActionError(
+        t(game.featured ? 'admin.gamesList.unfeatureFailed' : 'admin.gamesList.featureFailed', {
           name: game.name,
         }),
       )
@@ -128,14 +147,50 @@ export default function GamesList() {
                     </code>
                   </Td>
                   <Td>
-                    {game.published ? (
-                      <Badge tone="success">{t('admin.gamesList.published')}</Badge>
-                    ) : (
-                      <Badge tone="muted">{t('admin.gamesList.draft')}</Badge>
-                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {game.published ? (
+                        <Badge tone="success">{t('admin.gamesList.published')}</Badge>
+                      ) : (
+                        <Badge tone="muted">{t('admin.gamesList.draft')}</Badge>
+                      )}
+                      {game.featured && (
+                        <Badge tone="primary">{t('admin.gamesList.featured')}</Badge>
+                      )}
+                    </div>
                   </Td>
                   <Td>
                     <div className="flex justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => void toggleFeatured(game)}
+                        disabled={pendingId === game.id || !game.published}
+                        aria-pressed={game.featured}
+                        title={t(
+                          game.featured
+                            ? 'admin.gamesList.unfeature'
+                            : game.published
+                              ? 'admin.gamesList.feature'
+                              : 'admin.gamesList.featureDraft',
+                        )}
+                      >
+                        <Star
+                          size={15}
+                          aria-hidden="true"
+                          fill={game.featured ? 'currentColor' : 'none'}
+                        />
+                        <span className="sr-only">
+                          {t(
+                            game.featured
+                              ? 'admin.gamesList.unfeatureGame'
+                              : game.published
+                                ? 'admin.gamesList.featureGame'
+                                : 'admin.gamesList.featureDraftGame',
+                            { name: game.name },
+                          )}
+                        </span>
+                      </Button>
+
                       <Button
                         size="sm"
                         variant="ghost"

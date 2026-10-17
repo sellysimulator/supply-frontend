@@ -48,8 +48,9 @@ export default function Landing() {
   const { data: games, loading } = useAsync(() => listPublishedGames(), [])
 
   const stats = useMemo(() => summarise(games), [games])
-  const featured = useMemo(() => (games ?? []).slice(0, 6), [games])
-  const spans = useMemo(() => computeSpans(featured.length), [featured.length])
+  /* The featured game, if one is set, sorts first, so it always makes the cut. */
+  const preview = useMemo(() => (games ?? []).slice(0, 6), [games])
+  const spans = useMemo(() => computeSpans(preview.length), [preview.length])
 
   return (
     <PageContainer>
@@ -155,22 +156,22 @@ export default function Landing() {
 
         {loading ? (
           <LoadingSection label={t('landing.featured.loading')} />
-        ) : featured.length === 0 ? (
+        ) : preview.length === 0 ? (
           <Card className="mt-4 px-6 py-10 text-center text-muted-foreground">
             {t('landing.featured.empty')}
           </Card>
         ) : (
           <BentoGrid as="ul" className="mt-4">
-            {featured.map((game, index) => (
+            {preview.map((game, index) => (
               <BentoItem
                 as="li"
                 key={game.id}
                 span={spans[index] ?? 4}
                 index={index}
-                featured={index === 0}
+                featured={game.featured}
                 rowSpan
               >
-                <GameCard game={game} featured={index === 0} />
+                <GameCard game={game} featured={game.featured} />
               </BentoItem>
             ))}
           </BentoGrid>

@@ -15,6 +15,7 @@ const game: Game = {
   categories: ['Simulation'],
   launchUrl: 'https://example.com/beer-game',
   published: true,
+  featured: false,
   createdAt: null,
   updatedAt: null,
 }

@@ -17,7 +17,7 @@ const GAMES = 'games'
  * `resources`/`screenshots` jsonb columns, which no card renders.
  */
 const GAME_SUMMARY_COLUMNS =
-  'id, name, short_description, audience, categories, min_players, max_players, duration_minutes, thumbnail, sort_order'
+  'id, name, short_description, audience, categories, min_players, max_players, duration_minutes, thumbnail, sort_order, featured'
 
 type GameSummaryRow = Pick<
   GameRow,
@@ -31,6 +31,7 @@ type GameSummaryRow = Pick<
   | 'duration_minutes'
   | 'thumbnail'
   | 'sort_order'
+  | 'featured'
 >
 
 function toGameSummary(row: GameSummaryRow): GameSummary {
@@ -45,6 +46,7 @@ function toGameSummary(row: GameSummaryRow): GameSummary {
     durationMinutes: row.duration_minutes,
     thumbnail: row.thumbnail,
     sortOrder: row.sort_order,
+    featured: row.featured,
   }
 }
 
@@ -67,6 +69,7 @@ function toGame(row: GameRow): Game {
     launchUrl: row.launch_url,
     published: row.published,
     sortOrder: row.sort_order,
+    featured: row.featured,
     createdAt: row.created_at ? new Date(row.created_at) : null,
     updatedAt: row.updated_at ? new Date(row.updated_at) : null,
   }
@@ -99,15 +102,17 @@ function toRow(gameId: string, input: GameInput): GameWriteRow {
 /**
  * The public catalog, as the cards that list it render it. Unpublished entries
  * are filtered out by row level security, so this returns only what the caller
- * is allowed to see. `limit` bounds the row count for callers — like the
- * landing page — that only ever show the first few; the ordering matches the
- * `games_catalog_order_idx (published, sort_order, name)` index.
+ * is allowed to see. The featured game, if any, comes first, so a `limit` never
+ * cuts it off. `limit` bounds the row count for callers — like the landing
+ * page — that only ever show the first few; the ordering matches the
+ * `games_catalog_order_idx (published, featured desc, sort_order, name)` index.
  */
 export async function listPublishedGames(limit?: number): Promise<GameSummary[]> {
   let query = supabase
     .from(GAMES)
     .select(GAME_SUMMARY_COLUMNS)
     .eq('published', true)
+    .order('featured', { ascending: false })
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
 
@@ -164,8 +169,19 @@ export async function updateGame(gameId: string, input: GameInput): Promise<void
   if (error) throw new Error(error.message)
 }
 
+/** Unpublishing the featured game also un-features it — a database trigger does that. */
 export async function setGamePublished(gameId: string, published: boolean): Promise<void> {
   const { error } = await supabase.from(GAMES).update({ published }).eq('id', gameId)
+  if (error) throw new Error(error.message)
+}
+
+/**
+ * Makes `gameId` the one featured game, or features nothing when it is null.
+ * `set_featured_game` clears the previous choice in the same transaction and
+ * refuses a draft, so two games are never featured at once.
+ */
+export async function setFeaturedGame(gameId: string | null): Promise<void> {
+  const { error } = await supabase.rpc('set_featured_game', { p_game_id: gameId })
   if (error) throw new Error(error.message)
 }
 

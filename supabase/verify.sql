@@ -109,6 +109,13 @@ begin
   end;
   if not v_blocked then raise exception 'anon can call click_series_hourly'; end if;
 
+  v_blocked := false;
+  begin
+    perform public.set_featured_game('verify-published');
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'anon can choose the featured game'; end if;
+
   raise notice 'anonymous access: OK';
 end $$;
 
@@ -298,6 +305,15 @@ begin
     raise exception 'a non-administrator can call click_series_hourly';
   end if;
 
+  v_blocked := false;
+  begin
+    perform public.set_featured_game('verify-published');
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then
+    raise exception 'a non-administrator can choose the featured game';
+  end if;
+
   raise notice 'signed-in non-administrator: OK';
 end $$;
 
@@ -368,6 +384,54 @@ begin
   end if;
 
   raise notice 'administrator analytics: OK';
+end $$;
+
+-- The featured game: at most one at a time, and only a published one. Any game
+-- already featured in the real catalog is cleared here and restored by the
+-- rollback.
+do $$
+declare
+  v_featured text[];
+  v_blocked boolean;
+begin
+  perform public.set_featured_game('verify-published');
+  select array_agg(id) into v_featured from public.games where featured;
+  if v_featured is distinct from array['verify-published'] then
+    raise exception 'verify-published should be the only featured game, got %', v_featured;
+  end if;
+
+  perform public.set_featured_game('verify-game-ceiling');
+  select array_agg(id) into v_featured from public.games where featured;
+  if v_featured is distinct from array['verify-game-ceiling'] then
+    raise exception 'featuring a second game should replace the first, got %', v_featured;
+  end if;
+
+  v_blocked := false;
+  begin
+    update public.games set featured = true where id = 'verify-published';
+  exception when unique_violation then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'two games can be featured at once'; end if;
+
+  v_blocked := false;
+  begin
+    perform public.set_featured_game('verify-draft');
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'a draft can be featured'; end if;
+
+  update public.games set published = false where id = 'verify-game-ceiling';
+  if exists (select 1 from public.games where featured) then
+    raise exception 'unpublishing the featured game left it featured';
+  end if;
+
+  perform public.set_featured_game('verify-published');
+  perform public.set_featured_game(null);
+  if exists (select 1 from public.games where featured) then
+    raise exception 'set_featured_game(null) left a game featured';
+  end if;
+
+  raise notice 'featured game: OK';
 end $$;
 
 reset role;

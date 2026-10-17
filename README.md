@@ -62,8 +62,11 @@ npm run dev
 
 1. **Create a project** at supabase.com.
 2. **Apply the schema.** In the SQL editor, run
-   `supabase/migrations/0001_catalog.sql` then `supabase/migrations/0002_storage.sql`.
-   The second creates the `catalog-images` bucket and its policies.
+   `supabase/migrations/0001_catalog.sql`, `supabase/migrations/0002_storage.sql`,
+   then `supabase/migrations/0003_featured_game.sql`. The second creates the
+   `catalog-images` bucket and its policies; the third adds the featured game.
+   An existing project only needs the files it has not run yet — each is safe to
+   run more than once.
 3. **Check the rules hold.** Run `supabase/verify.sql` in the SQL editor. It
    seeds fixtures, asserts what anonymous and non-administrator callers can and
    cannot do, and rolls everything back. Any failure raises an exception; success
@@ -140,6 +143,15 @@ it cannot be renamed in place.
 
 Public reads are limited to published entries by the policy
 `published or is_admin()`; writes require `is_admin()`.
+
+`featured` marks the one game the landing page and the catalog show first, on
+the accented tile. An administrator sets it with the star in the admin games
+list, which calls `set_featured_game(p_game_id)` (null features nothing); that
+function clears the previous choice in the same transaction. The database holds
+both rules itself: a partial unique index admits a single featured row, a check
+constraint keeps drafts out, and a trigger un-features a game when it is
+unpublished. With nothing featured, no tile is accented and the catalog keeps
+its `sort_order` ordering.
 
 ### `admins`
 

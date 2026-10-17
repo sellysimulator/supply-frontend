@@ -27,6 +27,7 @@ const game: Game = {
   categories: ['Simulation'],
   launchUrl: 'https://sellysim.web.app',
   published: true,
+  featured: false,
   createdAt: null,
   updatedAt: null,
 }

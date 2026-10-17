@@ -77,6 +77,8 @@ export type GameResource = z.infer<typeof resourceSchema>
 /** A catalog entry as read back from the database. */
 export type Game = GameInput & {
   id: string
+  /** Not a form field: set only through `setFeaturedGame`, which keeps it to one game. */
+  featured: boolean
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -99,6 +101,7 @@ export type GameSummary = Pick<
   | 'durationMinutes'
   | 'thumbnail'
   | 'sortOrder'
+  | 'featured'
 >
 
 /** Defaults for a blank "add game" form. */

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
- * These cover the two places where a silent typo would break something without
- * failing loudly: the name and argument of the database function that records a
- * click, and the bucket and path an upload is written to — which have to match
+ * These cover the places where a silent typo would break something without
+ * failing loudly: the names and arguments of the database functions the client
+ * calls, and the bucket and path an upload is written to — which have to match
  * what the storage policies allow.
  */
 
@@ -29,6 +29,7 @@ vi.mock('../supabase/client', () => ({
 const { recordGameClick, listClickTotalsByGame, listHourlyClickSeries } =
   await import('../data/analytics')
 const { uploadCatalogImage, deleteCatalogImages } = await import('../data/images')
+const { setFeaturedGame } = await import('../data/games')
 
 beforeEach(() => {
   rpc.mockReset().mockResolvedValue({ error: null })
@@ -100,6 +101,23 @@ describe('reading the hourly click series', () => {
   it('throws so the dashboard can show its error state', async () => {
     rpc.mockResolvedValue({ data: null, error: { message: 'permission denied' } })
     await expect(listHourlyClickSeries()).rejects.toThrow(/permission denied/)
+  })
+})
+
+describe('choosing the featured game', () => {
+  it('calls the database function with the argument name it declares', async () => {
+    await setFeaturedGame('beer-game')
+    expect(rpc).toHaveBeenCalledWith('set_featured_game', { p_game_id: 'beer-game' })
+  })
+
+  it('passes null through to feature nothing', async () => {
+    await setFeaturedGame(null)
+    expect(rpc).toHaveBeenCalledWith('set_featured_game', { p_game_id: null })
+  })
+
+  it('throws so the admin list can report the refusal', async () => {
+    rpc.mockResolvedValue({ error: { message: 'only a published game can be featured' } })
+    await expect(setFeaturedGame('verify-draft')).rejects.toThrow(/published game/)
   })
 })
 

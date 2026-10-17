@@ -73,7 +73,13 @@ export default function GameForm() {
 
   useEffect(() => {
     if (existing) {
-      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...input } = existing
+      const {
+        id: _id,
+        featured: _featured,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        ...input
+      } = existing
       reset(input)
       setSlug(existing.id)
     }

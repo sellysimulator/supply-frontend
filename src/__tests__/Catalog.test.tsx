@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { emptyGameInput, type Game } from '../types/game'
@@ -19,6 +19,7 @@ const game = (id: string, name: string, categories: string[]): Game => ({
   categories,
   launchUrl: 'https://example.com/game',
   published: true,
+  featured: false,
   createdAt: null,
   updatedAt: null,
 })
@@ -63,6 +64,35 @@ describe('Catalog page', () => {
 
     await user.click(screen.getByRole('button', { name: 'All' }))
     expect(screen.getByRole('heading', { name: 'Beer Game' })).toBeInTheDocument()
+  })
+
+  it('accents only the game an administrator featured', async () => {
+    const user = userEvent.setup()
+    listPublishedGames.mockResolvedValue([
+      { ...game('selly', 'Tequila Game', ['Multiplayer']), featured: true },
+      game('beer-game', 'Beer Game', ['Simulation']),
+    ])
+    renderCatalog()
+
+    const tile = (name: string) => screen.getByRole('heading', { name }).closest('li')!
+    await screen.findByRole('heading', { name: 'Tequila Game' })
+    expect(within(tile('Tequila Game')).getByText('Featured')).toBeInTheDocument()
+    expect(within(tile('Beer Game')).queryByText('Featured')).not.toBeInTheDocument()
+
+    // Filtering the featured game out must not hand its accent to another entry.
+    await user.click(screen.getByRole('button', { name: 'Simulation' }))
+    expect(within(tile('Beer Game')).queryByText('Featured')).not.toBeInTheDocument()
+  })
+
+  it('accents no game when none is featured', async () => {
+    listPublishedGames.mockResolvedValue([
+      game('beer-game', 'Beer Game', ['Simulation']),
+      game('selly', 'Tequila Game', ['Multiplayer']),
+    ])
+    renderCatalog()
+
+    await screen.findByRole('heading', { name: 'Beer Game' })
+    expect(screen.queryByText('Featured')).not.toBeInTheDocument()
   })
 
   it('explains an empty catalog rather than showing a blank grid', async () => {

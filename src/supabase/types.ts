@@ -32,11 +32,14 @@ export type GameRow = {
   launch_url: string
   published: boolean
   sort_order: number
+  featured: boolean
   created_at: string
   updated_at: string
 }
 
-export type GameWriteRow = Omit<GameRow, 'created_at' | 'updated_at'>
+/* `featured` is left out: it changes only through `set_featured_game`, which
+   keeps it to one published game at a time. */
+export type GameWriteRow = Omit<GameRow, 'featured' | 'created_at' | 'updated_at'>
 
 export type AdminRow = {
   user_id: string
@@ -89,6 +92,10 @@ export type Database = {
       click_series_hourly: {
         Args: { p_hours: number }
         Returns: { hour: string; click_count: number }[]
+      }
+      set_featured_game: {
+        Args: { p_game_id: string | null }
+        Returns: void
       }
     }
     Enums: Record<never, never>

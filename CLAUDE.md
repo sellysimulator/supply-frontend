@@ -69,7 +69,7 @@ npm install
 npm run dev          # Vite dev server on :5173
 npm run build        # tsc -b && vite build  → dist/
 npm run preview      # serve the built bundle
-npm test             # Vitest, single run (13 files, 81 tests)
+npm test             # Vitest, single run (13 files, 90 tests)
 npm run test:watch
 npm run lint         # oxlint
 npm run format       # prettier --write .
@@ -111,8 +111,11 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
   **`design-system`**.
 - `.firebaserc` — project `supply-739a5`; `firebase.json` — site
   `supply-catalog`, `public: dist`, SPA rewrite, immutable caching on
-  `/assets/**`, `no-cache` on `index.html`, and the security headers (CSP,
-  nosniff, Referrer-Policy, X-Frame-Options). Both names keep the old brand
+  `/assets/**`, `no-cache` on `index.html` **and on every extensionless route**
+  (regex `^/[^.]*$`; the rewrite serves those as `index.html`, and a `source`
+  of `/index.html` does not match them, so without it a page stayed cached for
+  an hour and asked for bundles a newer deploy had deleted), and the security
+  headers (CSP, nosniff, Referrer-Policy, X-Frame-Options). Both names keep the old brand
   **deliberately** — a Firebase project id cannot be changed; see
   `../rebranding-steps.md`.
 - `.github/workflows/` — `firebase-hosting-merge.yml` (push to `main` → live)
@@ -171,7 +174,8 @@ src/
     admin/              Dashboard (uses the `Stat` primitive), GamesList, GameForm
   __tests__/            all tests, plus setup.ts
 
-supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image bucket
+supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image bucket;
+                        0003 featured game
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
 design-system/selly/MASTER.md   the visual spec (pages/ is currently empty)
 scripts/seed-catalog.mjs        bulk loader (Node, service role); seed-games.json
@@ -308,7 +312,7 @@ keep 4.5:1 contrast. Translucent surfaces use the `--overlay` token rather than
 
 ## Testing
 
-`npm test` runs everything in `src/__tests__/` (13 files, 81 tests). The Supabase
+`npm test` runs everything in `src/__tests__/` (13 files, 90 tests). The Supabase
 client is never constructed: `src/data/*` is mocked with `vi.mock`. `setup.ts`
 pins i18next to English (assertions quote the English copy) and stubs
 `matchMedia` for jsdom.
@@ -338,3 +342,7 @@ kind; clients cannot write it, and `record_game_click(p_game_id)` is the only wa
 in. Deleting a game leaves its counters intact. The dashboard never reads those
 rows directly — `click_totals_by_game` and `click_series_hourly` aggregate them
 in Postgres, so the figures cannot be silently truncated by the API's row cap.
+At most one published game is `featured` (partial unique index + check + an
+unpublish trigger); it is changed only through `set_featured_game`, never by the
+form, so `GameWriteRow` leaves it out. Pages read `game.featured` for the
+accented tile — never "the first game".

@@ -92,10 +92,10 @@ export default function Catalog() {
                 key={game.id}
                 span={spans[index] ?? 4}
                 index={index}
-                featured={index === 0}
+                featured={game.featured}
                 rowSpan
               >
-                <GameCard game={game} featured={index === 0} />
+                <GameCard game={game} featured={game.featured} />
               </BentoItem>
             ))}
           </BentoGrid>

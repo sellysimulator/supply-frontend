@@ -7,11 +7,13 @@ import { emptyGameInput, type Game } from '../types/game'
 const listAllGames = vi.fn()
 const deleteGame = vi.fn()
 const setGamePublished = vi.fn()
+const setFeaturedGame = vi.fn()
 
 vi.mock('../data/games', () => ({
   listAllGames: () => listAllGames(),
   deleteGame: (game: Game) => deleteGame(game),
   setGamePublished: (id: string, published: boolean) => setGamePublished(id, published),
+  setFeaturedGame: (id: string | null) => setFeaturedGame(id),
 }))
 
 const { default: GamesList } = await import('../pages/admin/GamesList')
@@ -28,6 +30,7 @@ const game: Game = {
   shortDescription: 'The classic supply chain simulation.',
   launchUrl: 'https://example.com/beer-game',
   published: true,
+  featured: false,
   createdAt: null,
   updatedAt: null,
 }
@@ -43,6 +46,7 @@ beforeEach(() => {
   listAllGames.mockReset().mockResolvedValue([game])
   deleteGame.mockReset()
   setGamePublished.mockReset()
+  setFeaturedGame.mockReset().mockResolvedValue(undefined)
 })
 
 describe('GamesList delete confirmation', () => {
@@ -65,5 +69,52 @@ describe('GamesList delete confirmation', () => {
     expect(within(dialog).queryByRole('img')).not.toBeInTheDocument()
     expect(dialog.querySelector('img')).toBeNull()
     expect(within(dialog).getByText(maliciousName)).toBeInTheDocument()
+  })
+})
+
+describe('GamesList featured game', () => {
+  const beer: Game = { ...game, name: 'Beer Game' }
+
+  it('features a published game', async () => {
+    const user = userEvent.setup()
+    listAllGames.mockResolvedValue([beer])
+    renderGamesList()
+
+    await user.click(await screen.findByRole('button', { name: 'Feature Beer Game' }))
+    expect(setFeaturedGame).toHaveBeenCalledWith('beer-game')
+  })
+
+  it('clears the choice when the featured game is toggled again', async () => {
+    const user = userEvent.setup()
+    listAllGames.mockResolvedValue([{ ...beer, featured: true }])
+    renderGamesList()
+
+    const toggle = await screen.findByRole('button', { name: 'Stop featuring Beer Game' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Featured')).toBeInTheDocument()
+
+    await user.click(toggle)
+    expect(setFeaturedGame).toHaveBeenCalledWith(null)
+  })
+
+  it('does not offer to feature a draft', async () => {
+    listAllGames.mockResolvedValue([{ ...beer, published: false }])
+    renderGamesList()
+
+    expect(
+      await screen.findByRole('button', {
+        name: 'Beer Game is a draft. Publish it before featuring it.',
+      }),
+    ).toBeDisabled()
+  })
+
+  it('reports a failed change instead of failing silently', async () => {
+    const user = userEvent.setup()
+    setFeaturedGame.mockRejectedValue(new Error('only a published game can be featured'))
+    listAllGames.mockResolvedValue([beer])
+    renderGamesList()
+
+    await user.click(await screen.findByRole('button', { name: 'Feature Beer Game' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not feature Beer Game.')
   })
 })
