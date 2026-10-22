@@ -272,9 +272,10 @@ manual: setting the project up, running it, and deploying it.
 ## Testing
 
 ```bash
-npm test    # 81 unit tests in 13 files — summing, schema, pages, components,
+npm test    # 115 unit tests in 15 files — summing, schema, pages, components,
             #   data layer, translation key parity, the theme and language
-            #   toggles, untrusted-name escaping, content-security-policy hash
+            #   toggles, untrusted-name escaping, content-security-policy hash,
+            #   the Supabase build guard and the hosting workflows
 ```
 
 The access rules are not covered by these: they run inside Postgres, so they are
@@ -292,6 +293,12 @@ in `.github/workflows/` do the same on push and on pull requests; they need
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository secrets,
 because those values are compiled into the bundle at build time (plus a Firebase
 service account).
+
+A missing secret reaches the build as an empty string, and the bundle used to
+build anyway into a blank page. Both workflows now set `REQUIRE_SUPABASE_ENV=1`
+on the build step, so `requireSupabaseEnv.ts` fails the build instead when
+either value is empty or the URL is not `https://<ref>.supabase.co`. To guard a
+local deploy the same way, run `REQUIRE_SUPABASE_ENV=1 npm run deploy`.
 
 The Firebase project (`supply-739a5`) and hosting site (`supply-catalog`) keep
 the pre-rebrand name deliberately: a Firebase project id cannot be renamed. See

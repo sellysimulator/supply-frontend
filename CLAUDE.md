@@ -69,7 +69,7 @@ npm install
 npm run dev          # Vite dev server on :5173
 npm run build        # tsc -b && vite build  → dist/
 npm run preview      # serve the built bundle
-npm test             # Vitest, single run (13 files, 90 tests)
+npm test             # Vitest, single run (15 files, 115 tests)
 npm run test:watch
 npm run lint         # oxlint
 npm run format       # prettier --write .
@@ -98,12 +98,19 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
 - `vite.config.ts` — react + tailwind plugins, port 5173. **No path aliases.**
   Every import is relative (`../supabase/client`); do not introduce `@/…`
   without adding it to both Vite and the tsconfigs.
+- `requireSupabaseEnv.ts` — the build plugin `vite.config.ts` adds. With
+  `REQUIRE_SUPABASE_ENV=1` (both hosting workflows set it on the build step) it
+  fails the build when `VITE_SUPABASE_URL` or `VITE_SUPABASE_PUBLISHABLE_KEY` is
+  empty, or when the URL is not `https://<ref>.supabase.co`, the only origin the
+  CSP allows. Without it, a missing secret built cleanly into a blank page:
+  `src/supabase/client.ts` throws on import. Off by default, so a local build
+  without `.env` still works.
 - `vitest.config.ts` — jsdom, globals, `src/__tests__/setup.ts`, include
   `src/**/*.test.{ts,tsx}`.
 - `tsconfig.json` — project references only; `tsconfig.app.json` covers `src`
   (strict, `noUncheckedIndexedAccess`, `noUnusedLocals/Parameters`,
   `erasableSyntaxOnly`, `verbatimModuleSyntax`), `tsconfig.node.json` covers
-  `vite.config.ts`.
+  `vite.config.ts` and `requireSupabaseEnv.ts`.
 - `.oxlintrc.json` — plugins react/typescript/oxc; `react/rules-of-hooks` error,
   `react/only-export-components` warn.
 - `.prettierrc.json` — `semi: false`, `singleQuote`, width 100, trailing commas.
@@ -121,7 +128,9 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
 - `.github/workflows/` — `firebase-hosting-merge.yml` (push to `main` → live)
   and `firebase-hosting-pull-request.yml` (PR → preview channel, same-repo PRs
   only). Secrets: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
-  `FIREBASE_SERVICE_ACCOUNT_SUPPLY_739A5`.
+  `FIREBASE_SERVICE_ACCOUNT_SUPPLY_739A5`. Both build steps set
+  `REQUIRE_SUPABASE_ENV: '1'`; `src/__tests__/deployWorkflows.test.ts` fails if
+  either loses it or a gate.
 - `supabase/` holds SQL only — there is **no Supabase CLI project here**.
   Migrations are applied by hand in the SQL editor.
 
@@ -179,6 +188,7 @@ supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image buck
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
 design-system/selly/MASTER.md   the visual spec (pages/ is currently empty)
 scripts/seed-catalog.mjs        bulk loader (Node, service role); seed-games.json
+requireSupabaseEnv.ts           build guard against an empty or wrong Supabase URL/key
 .claude/skills/ .agents/skills/ vendored Firebase/Xcode agent skills (not app code)
 ```
 
@@ -312,7 +322,7 @@ keep 4.5:1 contrast. Translucent surfaces use the `--overlay` token rather than
 
 ## Testing
 
-`npm test` runs everything in `src/__tests__/` (13 files, 90 tests). The Supabase
+`npm test` runs everything in `src/__tests__/` (15 files, 115 tests). The Supabase
 client is never constructed: `src/data/*` is mocked with `vi.mock`. `setup.ts`
 pins i18next to English (assertions quote the English copy) and stubs
 `matchMedia` for jsdom.
@@ -320,8 +330,9 @@ pins i18next to English (assertions quote the English copy) and stubs
 Covered: catalog page behaviour, game card and details, admin games list, terms
 disclosure, click summing, the bento span arithmetic, the zod schema, the data
 layer, translation key parity, the language and theme toggles, that an untrusted
-game name renders as text rather than markup, and that the
-Content-Security-Policy still matches the inline script it allow-lists.
+game name renders as text rather than markup, that the
+Content-Security-Policy still matches the inline script it allow-lists, the
+Supabase build guard, and that both hosting workflows run the gates and turn it on.
 
 jsdom implements no `IntersectionObserver`, and `useRevealOnScroll` guards on
 exactly that, so every tile is revealed on mount under test. That guard is also

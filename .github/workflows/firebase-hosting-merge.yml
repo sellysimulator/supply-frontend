@@ -22,6 +22,9 @@ jobs:
           # reference out of the workflow file.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # A missing secret arrives as an empty string and still builds, into
+          # a blank page. This makes requireSupabaseEnv.ts fail the build.
+          REQUIRE_SUPABASE_ENV: '1'
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
