@@ -13,13 +13,13 @@ const PROJECT_URL = /^https:\/\/[a-z0-9]+\.supabase\.co\/?$/
 
 /**
  * What is wrong with the Supabase settings a bundle is about to be built with;
- * empty when nothing is. Values are never echoed: CI masks them anyway, and a
- * key pasted into the wrong secret should not reach a build log.
+ * empty when nothing is. Values are never echoed; the message names the
+ * variable, which is all it takes to fix it.
  */
 export function supabaseEnvProblems(env: Record<string, string | undefined>): string[] {
   return REQUIRED_SUPABASE_VARS.flatMap((key) => {
     const value = (env[key] ?? '').trim()
-    if (!value) return [`${key} is empty — set the repository secret ${key}.`]
+    if (!value) return [`${key} is empty — set the repository variable ${key}.`]
     if (key === 'VITE_SUPABASE_URL' && !PROJECT_URL.test(value))
       return [
         `${key} is not a Supabase project URL (https://<ref>.supabase.co), the only origin the Content-Security-Policy in firebase.json allows.`,
@@ -33,8 +33,8 @@ export function supabaseEnvProblems(env: Record<string, string | undefined>): st
  * but only when `REQUIRE_SUPABASE_ENV=1`, which both hosting workflows set on
  * their build step.
  *
- * `.env` is gitignored, so CI has these values only through repository secrets.
- * A missing secret reaches the build as an empty string, Vite inlines it, and
+ * `.env` is gitignored, so CI has these values only through repository variables.
+ * A missing variable reaches the build as an empty string, Vite inlines it, and
  * the build still succeeds; `src/supabase/client.ts` then throws on import in
  * the browser and the live catalog is a blank page behind a green deploy. This
  * turns that into a red build.

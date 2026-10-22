@@ -89,7 +89,7 @@ Node: `engines` allows `^22.14 || ^24 || >=26`; CI pins Node 24.
 
 Copy `.env.example` → `.env`. Only `VITE_SUPABASE_URL` and
 `VITE_SUPABASE_PUBLISHABLE_KEY` reach the browser (Vite inlines every `VITE_*`
-at build time, which is why both are repository secrets in CI).
+at build time, which is why both are repository variables in CI).
 `SUPABASE_SECRET_KEY` is read by `scripts/seed-catalog.mjs` in Node only and
 must **never** gain a `VITE_` prefix — it bypasses row level security.
 
@@ -102,7 +102,7 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
   `REQUIRE_SUPABASE_ENV=1` (both hosting workflows set it on the build step) it
   fails the build when `VITE_SUPABASE_URL` or `VITE_SUPABASE_PUBLISHABLE_KEY` is
   empty, or when the URL is not `https://<ref>.supabase.co`, the only origin the
-  CSP allows. Without it, a missing secret built cleanly into a blank page:
+  CSP allows. Without it, a missing variable built cleanly into a blank page:
   `src/supabase/client.ts` throws on import. Off by default, so a local build
   without `.env` still works.
 - `vitest.config.ts` — jsdom, globals, `src/__tests__/setup.ts`, include
@@ -127,7 +127,7 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
   `../rebranding-steps.md`.
 - `.github/workflows/` — `firebase-hosting-merge.yml` (push to `main` → live)
   and `firebase-hosting-pull-request.yml` (PR → preview channel, same-repo PRs
-  only). Secrets: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
+  only). Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`; secret:
   `FIREBASE_SERVICE_ACCOUNT_SUPPLY_739A5`. Both build steps set
   `REQUIRE_SUPABASE_ENV: '1'`; `src/__tests__/deployWorkflows.test.ts` fails if
   either loses it or a gate.

@@ -18,11 +18,10 @@ jobs:
       - run: npm run build
         env:
           # Compiled into the bundle at build time, so they must be present in
-          # CI. Neither is a secret, but repository secrets keep the project
-          # reference out of the workflow file.
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          # A missing secret arrives as an empty string and still builds, into
+          # CI. Neither is a secret, so both are repository variables.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # A missing variable arrives as an empty string and still builds, into
           # a blank page. This makes requireSupabaseEnv.ts fail the build.
           REQUIRE_SUPABASE_ENV: '1'
       - uses: FirebaseExtended/action-hosting-deploy@v0

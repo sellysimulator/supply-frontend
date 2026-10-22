@@ -290,11 +290,12 @@ nobody can grant themselves administrator.
 The site is a static bundle on Firebase Hosting (the free tier, no billing
 account required). `npm run deploy` builds and deploys it. The GitHub workflows
 in `.github/workflows/` do the same on push and on pull requests; they need
-`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository secrets,
-because those values are compiled into the bundle at build time (plus a Firebase
-service account).
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as repository
+variables (Settings → Secrets and variables → Actions → Variables), because
+those values are compiled into the bundle at build time, plus the Firebase
+service account as a repository secret.
 
-A missing secret reaches the build as an empty string, and the bundle used to
+A missing variable reaches the build as an empty string, and the bundle used to
 build anyway into a blank page. Both workflows now set `REQUIRE_SUPABASE_ENV=1`
 on the build step, so `requireSupabaseEnv.ts` fails the build instead when
 either value is empty or the URL is not `https://<ref>.supabase.co`. To guard a

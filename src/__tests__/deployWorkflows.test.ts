@@ -4,7 +4,7 @@ import pullRequestWorkflow from '../../.github/workflows/firebase-hosting-pull-r
 
 /**
  * Both hosting workflows build the bundle that Firebase serves. A missing
- * Supabase secret used to build cleanly into a blank page, so each build step
+ * Supabase variable used to build cleanly into a blank page, so each build step
  * must turn on the guard in requireSupabaseEnv.ts, and the gates must run
  * before anything is deployed.
  */
@@ -19,8 +19,8 @@ const GATES_IN_ORDER = [
 
 const BUILD_ENV = [
   "REQUIRE_SUPABASE_ENV: '1'",
-  'VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}',
-  'VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}',
+  'VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}',
+  'VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}',
 ]
 
 /** What is wrong with a hosting workflow; empty when nothing is. Comment lines are ignored. */
