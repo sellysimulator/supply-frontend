@@ -123,8 +123,8 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
   of `/index.html` does not match them, so without it a page stayed cached for
   an hour and asked for bundles a newer deploy had deleted), and the security
   headers (CSP, nosniff, Referrer-Policy, X-Frame-Options). Both names keep the old brand
-  **deliberately** — a Firebase project id cannot be changed; see
-  `../rebranding-steps.md`.
+  **deliberately** — a Firebase project id cannot be changed, and renaming the
+  hosting site was decided against.
 - `.github/workflows/` — `firebase-hosting-merge.yml` (push to `main` → live)
   and `firebase-hosting-pull-request.yml` (PR → preview channel, same-repo PRs
   only). Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`; secret:

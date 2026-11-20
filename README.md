@@ -301,8 +301,8 @@ either value is empty or the URL is not `https://<ref>.supabase.co`. To guard a
 local deploy the same way, run `REQUIRE_SUPABASE_ENV=1 npm run deploy`.
 
 The Firebase project (`supply-739a5`) and hosting site (`supply-catalog`) keep
-the pre-rebrand name deliberately: a Firebase project id cannot be renamed. See
-`../rebranding-steps.md`.
+the pre-rebrand name deliberately: a Firebase project id cannot be renamed, and
+renaming the hosting site was decided against.
 
 ## Not built yet
 
