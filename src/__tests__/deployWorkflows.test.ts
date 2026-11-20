@@ -4,7 +4,7 @@ import pullRequestWorkflow from '../../.github/workflows/firebase-hosting-pull-r
 
 /**
  * Both hosting workflows build the bundle that Firebase serves. A missing
- * Supabase variable used to build cleanly into a blank page, so each build step
+ * Supabase variable would otherwise build cleanly into a blank page, so each build step
  * must turn on the guard in requireSupabaseEnv.ts, and the gates must run
  * before anything is deployed.
  */

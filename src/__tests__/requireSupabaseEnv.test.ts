@@ -4,9 +4,9 @@ import { requireSupabaseEnv, supabaseEnvProblems } from '../../requireSupabaseEn
 
 /**
  * Vite inlines every `VITE_*` variable at build time, and a missing repository
- * variable reaches the build as an empty string. The build used to succeed
- * anyway, and `src/supabase/client.ts` then threw on import in the browser:
- * the live catalog was a blank page behind two green deploys. The guard turns
+ * variable reaches the build as an empty string. Without a guard the build
+ * succeeds anyway, and `src/supabase/client.ts` then throws on import in the
+ * browser: the live catalog is a blank page behind green deploys. The guard turns
  * that into a red build, but only when the workflows ask for it.
  */
 
