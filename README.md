@@ -29,9 +29,7 @@ Selly
 ```
 
 **Firebase is hosting only** — no Firestore, no Firebase Auth, Functions or
-Firebase Storage. Data, authentication and file storage are all Supabase. (The
-vendored Firebase agent skills under `.claude/skills/` are tooling, not part of
-this app's architecture.)
+Firebase Storage. Data, authentication and file storage are all Supabase.
 
 Because there is no server, **row level security is the authorization**. Hiding
 the admin interface is not a control; the policies in `supabase/migrations/` are,
@@ -55,6 +53,7 @@ npm run dev
 | `npm run build`                   | Type-check and build to `dist/`       |
 | `npm test`                        | Unit tests                            |
 | `npm run seed`                    | Bulk-load catalog entries (see below) |
+| `npm run seed:media`              | Bulk-load catalog images (see below)  |
 | `npm run lint` / `npm run format` | oxlint / Prettier                     |
 | `npm run deploy`                  | Build and deploy to Firebase Hosting  |
 
@@ -304,3 +303,17 @@ local deploy the same way, run `REQUIRE_SUPABASE_ENV=1 npm run deploy`.
 The Firebase project (`supply-739a5`) and hosting site (`supply-catalog`) keep
 the pre-rebrand name deliberately: a Firebase project id cannot be renamed. See
 `../rebranding-steps.md`.
+
+## Not built yet
+
+Admin dashboard charts that were proposed and never built:
+
+- **A range control.** One 24 h / 7 d / 30 d / 90 d control driving
+  `listClickTotalsByGame` and `listHourlyClickSeries` (the dashboard asks for fixed windows
+  today, 30 days and 48 hours), with each tile showing the change against the previous
+  period and a sparkline.
+- **A weekday × hour heatmap** of launches, from a new grouped query over `click_counts`
+  (admin-only, like the existing analytics functions), drawn as an HTML grid.
+- **Sparklines and keyboard access.** A sparkline on each row of the per-game list, and
+  hourly bars that take keyboard focus with the tooltip anchored to the bar. Until then the
+  hourly chart's hover detail is reachable without a pointer only through its table view.
