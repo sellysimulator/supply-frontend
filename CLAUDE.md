@@ -25,9 +25,9 @@ catalog lists, each independently developed, deployed and versioned:
 | `Pulky/`         | Pulp game                                                      |
 | `Selly-Designs/` | standalone HTML design explorations for this catalog           |
 
-The games share a stack — FastAPI, Socket.IO, MySQL, Redis, documented in
+The games share a stack — FastAPI, Socket.IO, PostgreSQL, Redis, documented in
 `../game_stack.md` — that describes **them, not Selly**. Do not import their
-conventions here. Selly has no application server and no Firestore/MySQL.
+conventions here. Selly has no application server and no Firestore/PostgreSQL.
 
 ## Read the README
 
@@ -83,7 +83,7 @@ workflows run exactly those three, then deploy. `npm run lint` currently emits
 one pre-existing **warning** (`GameForm.tsx` react-compiler
 `incompatible-library`); oxlint exits 0 on warnings.
 
-Node: `engines` allows `^22.14 || ^24 || >=26`; CI pins Node 24.
+Node: `engines` allows `^22.23.4 || ^24.22.1 || >=26.12.1` (the October 2026 security-release floors); CI pins Node 24.
 
 ## Environment
 
