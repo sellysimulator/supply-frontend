@@ -14,16 +14,17 @@ It never runs a game, stores gameplay data, or acts as a backend for one.
 > rename is a pending manual step — see `../rebranding-steps.md`.
 
 Where it sits in the Novus stack — the siblings under `../` are the games this
-catalog lists, each independently developed, deployed and versioned:
+catalog lists, each independently developed, deployed and versioned, plus the
+marketing media:
 
-| Folder           | What it is                                                     |
-| ---------------- | -------------------------------------------------------------- |
-| `Supply/`        | **this app** — Selly, the catalog                              |
-| `Selly/`         | **Tequila Game** (the name `Selly` moved off it in the rename) |
-| `Beery/`         | Beer Game                                                      |
-| `Lemony/`        | Lemonade game                                                  |
-| `Pulky/`         | Pulp game                                                      |
-| `Selly-Designs/` | standalone HTML design explorations for this catalog           |
+| Folder       | What it is                                                     |
+| ------------ | -------------------------------------------------------------- |
+| `Supply/`    | **this app** — Selly, the catalog                              |
+| `Selly/`     | **Tequila Game** (the name `Selly` moved off it in the rename) |
+| `Beery/`     | Beer Game                                                      |
+| `Lemony/`    | Lemonade game                                                  |
+| `Pulky/`     | Pulque Game                                                    |
+| `Marketing/` | media that `npm run seed:media` uploads to the catalog         |
 
 The games share a stack — FastAPI, Socket.IO, PostgreSQL, Redis, documented in
 `../game_stack.md` — that describes **them, not Selly**. Do not import their
@@ -55,9 +56,7 @@ rightmost-`x-forwarded-for` reasoning), and deployment.
 | Hosting | Firebase Hosting, static bundle from `dist/`                         |
 
 **Firebase is hosting only** — no Firestore, Auth, Functions or Storage from
-Firebase. All data, auth and file storage is Supabase. (The Firebase agent
-skills in `.claude/skills/` and `.agents/skills/` are vendored tooling, not a
-statement about this app's architecture.)
+Firebase. All data, auth and file storage is Supabase.
 
 There is **no application server**. Row level security in
 `supabase/migrations/` is the authorization; hiding the admin UI is not.
@@ -75,6 +74,7 @@ npm run lint         # oxlint
 npm run format       # prettier --write .
 npm run format:check # prettier --check .
 npm run seed         # bulk-load scripts/seed-games.json with the secret key
+npm run seed:media   # upload catalog images from one folder per game (README)
 npm run deploy       # build + firebase deploy --only hosting
 ```
 
@@ -123,8 +123,8 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
   of `/index.html` does not match them, so without it a page stayed cached for
   an hour and asked for bundles a newer deploy had deleted), and the security
   headers (CSP, nosniff, Referrer-Policy, X-Frame-Options). Both names keep the old brand
-  **deliberately** — a Firebase project id cannot be changed; see
-  `../rebranding-steps.md`.
+  **deliberately** — a Firebase project id cannot be changed, and renaming the
+  hosting site was decided against.
 - `.github/workflows/` — `firebase-hosting-merge.yml` (push to `main` → live)
   and `firebase-hosting-pull-request.yml` (PR → preview channel, same-repo PRs
   only). Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`; secret:
@@ -188,8 +188,8 @@ supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image buck
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
 design-system/selly/MASTER.md   the visual spec (pages/ is currently empty)
 scripts/seed-catalog.mjs        bulk loader (Node, service role); seed-games.json
+scripts/publish-catalog-media.mjs  bulk image loader (`npm run seed:media`)
 requireSupabaseEnv.ts           build guard against an empty or wrong Supabase URL/key
-.claude/skills/ .agents/skills/ vendored Firebase/Xcode agent skills (not app code)
 ```
 
 **Naming:** pages are `export default`; everything else is a named export.
