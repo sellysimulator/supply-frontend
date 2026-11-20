@@ -39,7 +39,7 @@ and `supabase/verify.sql` proves they hold.
 
 ## Getting started
 
-Node 22.14+, 24, or 26+ (the `engines` range in `package.json`; CI uses Node 24).
+Node 22.23.4+, 24.22.1+, or 26.12.1+ (the `engines` range in `package.json`: the releases patched in the 21 October 2026 Node security release; CI uses Node 24).
 
 ```bash
 npm install
