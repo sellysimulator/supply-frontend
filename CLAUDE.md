@@ -188,7 +188,7 @@ src/
   __tests__/            all tests, plus setup.ts
 
 supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image bucket;
-                        0003 featured game
+                        0003 featured game; 0004 only admins may list the bucket
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
 design-system/selly/MASTER.md   the visual spec (pages/ is currently empty)
 scripts/seed-catalog.mjs        bulk loader (Node, service role); seed-games.json
