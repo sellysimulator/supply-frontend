@@ -120,16 +120,16 @@ export default function GameForm() {
         setSlugErrorKey(parsed.error.issues[0]?.message ?? 'validation.identifierFormat')
         return
       }
-      if (await gameIdExists(slug)) {
-        setSlugErrorKey('admin.form.identifierTaken')
-        return
-      }
     }
 
     try {
       if (isEditing && gameId) {
         await updateGame(gameId, values)
       } else {
+        if (await gameIdExists(slug)) {
+          setSlugErrorKey('admin.form.identifierTaken')
+          return
+        }
         await createGame(slug, values)
       }
     } catch {
@@ -324,7 +324,11 @@ export default function GameForm() {
             </Field>
           </div>
 
-          <Field label={t('admin.form.audience')} hint={t('admin.form.audienceHint')}>
+          <Field
+            label={t('admin.form.audience')}
+            hint={t('admin.form.audienceHint')}
+            error={message(errors.audience?.message)}
+          >
             {({ id, describedBy }) => (
               <Input id={id} aria-describedby={describedBy} {...register('audience')} />
             )}
@@ -465,7 +469,11 @@ export default function GameForm() {
             />
           </div>
 
-          <Field label={t('admin.form.sortOrder')} hint={t('admin.form.sortOrderHint')}>
+          <Field
+            label={t('admin.form.sortOrder')}
+            hint={t('admin.form.sortOrderHint')}
+            error={message(errors.sortOrder?.message)}
+          >
             {({ id, describedBy }) => (
               <Input
                 id={id}

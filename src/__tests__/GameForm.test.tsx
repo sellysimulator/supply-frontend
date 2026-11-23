@@ -177,3 +177,74 @@ describe('GameForm images', () => {
     expect(deleteCatalogImages).toHaveBeenCalledWith([extra])
   })
 })
+
+describe('GameForm validation and save feedback', () => {
+  it('shows the audience length error instead of failing silently', async () => {
+    const user = userEvent.setup()
+    renderForm()
+    const audience = await screen.findByLabelText('Intended audience')
+
+    await user.clear(audience)
+    await user.click(audience)
+    await user.paste('x'.repeat(161))
+    await user.click(saveButton())
+
+    expect(await screen.findByText('Keep the audience under 160 characters')).toBeInTheDocument()
+    expect(updateGame).not.toHaveBeenCalled()
+  })
+
+  it('shows an error for a cleared sort order', async () => {
+    const user = userEvent.setup()
+    renderForm()
+    await user.clear(await screen.findByLabelText('Sort order'))
+    await user.click(saveButton())
+
+    expect(await screen.findByText('Enter a whole number')).toBeInTheDocument()
+    expect(updateGame).not.toHaveBeenCalled()
+  })
+
+  it('reports a failed identifier check instead of doing nothing', async () => {
+    gameIdExists.mockRejectedValue(new Error('Failed to fetch'))
+    const user = userEvent.setup()
+    renderForm('/admin/games/new')
+
+    await user.type(screen.getByLabelText(/^Name/), 'Beer Game')
+    await user.type(
+      screen.getByLabelText(/^Catalog summary/),
+      'The classic supply chain simulation.',
+    )
+    await user.type(
+      screen.getByLabelText(/^Full description/),
+      'A long enough description of the classic game.',
+    )
+    await user.type(screen.getByLabelText(/^Launch URL/), 'https://example.com/beer-game')
+    await user.click(screen.getAllByRole('button', { name: 'Create game' })[0]!)
+
+    expect(await screen.findByText(/saving failed/i)).toBeInTheDocument()
+    expect(gameIdExists).toHaveBeenCalledWith('beer-game')
+    expect(createGame).not.toHaveBeenCalled()
+  })
+
+  it('still reports a taken identifier', async () => {
+    gameIdExists.mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderForm('/admin/games/new')
+
+    await user.type(screen.getByLabelText(/^Name/), 'Beer Game')
+    await user.type(
+      screen.getByLabelText(/^Catalog summary/),
+      'The classic supply chain simulation.',
+    )
+    await user.type(
+      screen.getByLabelText(/^Full description/),
+      'A long enough description of the classic game.',
+    )
+    await user.type(screen.getByLabelText(/^Launch URL/), 'https://example.com/beer-game')
+    await user.click(screen.getAllByRole('button', { name: 'Create game' })[0]!)
+
+    expect(
+      await screen.findByText('A game with this identifier already exists'),
+    ).toBeInTheDocument()
+    expect(createGame).not.toHaveBeenCalled()
+  })
+})
