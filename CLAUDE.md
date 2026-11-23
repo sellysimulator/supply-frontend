@@ -68,7 +68,7 @@ npm install
 npm run dev          # Vite dev server on :5173
 npm run build        # tsc -b && vite build  → dist/
 npm run preview      # serve the built bundle
-npm test             # Vitest, single run (15 files, 115 tests)
+npm test             # Vitest, single run (19 files, 140 tests)
 npm run test:watch
 npm run lint         # oxlint
 npm run format       # prettier --write .
@@ -328,13 +328,14 @@ keep 4.5:1 contrast. Translucent surfaces use the `--overlay` token rather than
 
 ## Testing
 
-`npm test` runs everything in `src/__tests__/` (15 files, 115 tests). The Supabase
+`npm test` runs everything in `src/__tests__/` (19 files, 140 tests). The Supabase
 client is never constructed: `src/data/*` is mocked with `vi.mock`. `setup.ts`
 pins i18next to English (assertions quote the English copy) and stubs
 `matchMedia` for jsdom.
 
-Covered: catalog page behaviour, game card and details, admin games list, terms
-disclosure, click summing, the bento span arithmetic, the zod schema, the data
+Covered: catalog, landing and details pages (including load-error retries), the
+admin games list and game form (deferred image deletion, validation feedback),
+the administrator check, the error boundary, terms disclosure, click summing, the bento span arithmetic, the zod schema, the data
 layer, translation key parity, the language and theme toggles, that an untrusted
 game name renders as text rather than markup, that the
 Content-Security-Policy still matches the inline script it allow-lists, the

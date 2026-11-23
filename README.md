@@ -275,7 +275,7 @@ manual: setting the project up, running it, and deploying it.
 ## Testing
 
 ```bash
-npm test    # 115 unit tests in 15 files — summing, schema, pages, components,
+npm test    # 140 unit tests in 19 files — summing, schema, pages, components,
             #   data layer, translation key parity, the theme and language
             #   toggles, untrusted-name escaping, content-security-policy hash,
             #   the Supabase build guard and the hosting workflows
