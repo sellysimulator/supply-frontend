@@ -25,7 +25,8 @@ import { useAuth } from '../auth/useAuth'
  */
 export default function SignIn() {
   const { t } = useTranslation()
-  const { user, loading, isAdmin, checkingRole, signIn, signOut } = useAuth()
+  const { user, loading, isAdmin, checkingRole, roleCheckFailed, retryRoleCheck, signIn, signOut } =
+    useAuth()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -92,7 +93,25 @@ export default function SignIn() {
           </Card>
         )}
 
-        {user && !isAdmin && (
+        {user && roleCheckFailed && (
+          <Card>
+            <CardBody className="flex flex-col gap-4">
+              <p role="alert" className="text-sm font-medium text-destructive">
+                {t('signIn.roleCheckFailed')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={retryRoleCheck}>
+                  {t('common.tryAgain')}
+                </Button>
+                <Button variant="ghost" onClick={() => void signOut()}>
+                  {t('signIn.signOut')}
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
+        {user && !isAdmin && !roleCheckFailed && (
           <Card>
             <CardHeader>
               <CardTitle>{t('signIn.notAdminTitle')}</CardTitle>

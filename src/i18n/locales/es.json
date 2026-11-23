@@ -171,7 +171,8 @@
     "grantAccessBody": "En el editor SQL de Supabase, ejecute <0></0> con el identificador de usuario que aparece debajo y recargue esta página.",
     "copy": "Copiar",
     "copied": "Copiado",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "roleCheckFailed": "No se pudo comprobar su acceso de administrador. Compruebe su conexión e inténtelo de nuevo."
   },
   "admin": {
     "title": "Administración",

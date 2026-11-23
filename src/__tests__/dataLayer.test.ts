@@ -37,6 +37,7 @@ const { recordGameClick, listClickTotalsByGame, listHourlyClickSeries } =
   await import('../data/analytics')
 const { uploadCatalogImage, deleteCatalogImages } = await import('../data/images')
 const { getGame, setFeaturedGame } = await import('../data/games')
+const { isAdministrator } = await import('../data/admins')
 
 beforeEach(() => {
   rpc.mockReset().mockResolvedValue({ error: null })
@@ -122,6 +123,23 @@ describe('reading one game', () => {
   it('throws on a failed query, so a network error is not reported as "not found"', async () => {
     maybeSingle.mockResolvedValue({ data: null, error: { message: 'Failed to fetch' } })
     await expect(getGame('beer-game')).rejects.toThrow(/Failed to fetch/)
+  })
+})
+
+describe('checking for an administrator', () => {
+  it("reads the caller's own row in admins", async () => {
+    maybeSingle.mockResolvedValue({ data: { user_id: 'user-1' }, error: null })
+    await expect(isAdministrator('user-1')).resolves.toBe(true)
+    expect(from).toHaveBeenCalledWith('admins')
+  })
+
+  it('treats no row as "not an administrator"', async () => {
+    await expect(isAdministrator('user-1')).resolves.toBe(false)
+  })
+
+  it('throws on a failed query, so a network error is not reported as "not an administrator"', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: { message: 'Failed to fetch' } })
+    await expect(isAdministrator('user-1')).rejects.toThrow(/Failed to fetch/)
   })
 })
 

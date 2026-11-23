@@ -151,7 +151,8 @@ src/
     ThemeProvider.tsx   resolves system/light/dark, toggles `.dark` on <html>
     useTheme.ts
   auth/
-    AuthProvider.tsx    Supabase session + whether the account is in `admins`
+    AuthProvider.tsx    Supabase session + whether the account is in `admins`;
+                        a failed lookup sets `roleCheckFailed` (SignIn offers a retry)
     context.ts useAuth.ts RequireAdmin.tsx
   supabase/
     client.ts           the one Supabase client; CATALOG_IMAGE_BUCKET
@@ -161,6 +162,7 @@ src/
     analytics.ts        record_game_click RPC, the two aggregate reads
     clickMetrics.ts     pure summing helpers (unit-tested)
     images.ts           uploads to games/{gameId}/… in catalog-images
+    admins.ts           isAdministrator — throws on a failed lookup, false for no row
   types/game.ts         zod schema + Game/GameInput/GameSummary + emptyGameInput
   hooks/
     useAsync.ts         the loading/error/data/reload shape every page uses
