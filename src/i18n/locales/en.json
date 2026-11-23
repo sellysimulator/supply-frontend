@@ -60,7 +60,8 @@
       "description": "A selection of what is available right now.",
       "viewAll": "View all",
       "loading": "Loading games",
-      "empty": "No games have been published yet. Please check back soon."
+      "empty": "No games have been published yet. Please check back soon.",
+      "loadError": "The games could not be loaded. Check your connection and try again."
     },
     "stats": {
       "heading": "Selly in numbers",
@@ -146,7 +147,8 @@
     "launch": "Launch game",
     "launchNote": "Opens in a new tab. This game is operated independently of Selly.",
     "resources": "Instructions and resources",
-    "tags": "Tags"
+    "tags": "Tags",
+    "loadError": "This game could not be loaded. Check your connection and try again."
   },
   "notFound": {
     "eyebrow": "Error 404",
@@ -247,7 +249,7 @@
     "form": {
       "loading": "Loading game",
       "notFoundTitle": "Game not found",
-      "notFoundDescription": "This catalog entry could not be loaded.",
+      "notFoundDescription": "This catalog entry does not exist. It may have been deleted.",
       "back": "Back to games",
       "edit": "Edit {{name}}",
       "add": "Add a game",
@@ -290,7 +292,8 @@
       "sortOrder": "Sort order",
       "sortOrderHint": "Lower numbers appear first in the catalog.",
       "published": "Published",
-      "publishedHint": "Published games are visible to everyone in the public catalog."
+      "publishedHint": "Published games are visible to everyone in the public catalog.",
+      "loadError": "This catalog entry could not be loaded. Check your connection and try again."
     },
     "images": {
       "addImages": "Add images",

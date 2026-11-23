@@ -250,7 +250,9 @@ with a retry → `EmptyState` → content, inside `PageContainer` + `PageHeading
 query; `useAsync` catches it into `error` and pages render `ErrorState` with a
 `reload` retry. Two deliberate exceptions: `recordGameClick` swallows failures
 (analytics must never block a launch) and `getGame` returns `null` for both
-"missing" and "not allowed to see it", so the public site cannot distinguish.
+"missing" and "not allowed to see it", so the public site cannot distinguish —
+but it still throws when the query itself fails, so a network error shows the
+retry rather than "not found".
 
 **Accessibility is not optional:** visible labels (never placeholder-as-label),
 44px touch targets, a visible focus ring (`:focus-visible` in `@layer base`,

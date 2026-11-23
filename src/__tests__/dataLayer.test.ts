@@ -11,11 +11,18 @@ const rpc = vi.fn()
 const upload = vi.fn()
 const getPublicUrl = vi.fn()
 const remove = vi.fn()
+const from = vi.fn()
+const maybeSingle = vi.fn()
 
 vi.mock('../supabase/client', () => ({
   CATALOG_IMAGE_BUCKET: 'catalog-images',
   supabase: {
     rpc: (...args: unknown[]) => rpc(...args),
+    // The single-row read chain: from(table).select(columns).eq(column, value).maybeSingle().
+    from: (table: string) => {
+      from(table)
+      return { select: () => ({ eq: () => ({ maybeSingle: () => maybeSingle() }) }) }
+    },
     storage: {
       from: (bucket: string) => ({
         upload: (...args: unknown[]) => upload(bucket, ...args),
@@ -29,12 +36,14 @@ vi.mock('../supabase/client', () => ({
 const { recordGameClick, listClickTotalsByGame, listHourlyClickSeries } =
   await import('../data/analytics')
 const { uploadCatalogImage, deleteCatalogImages } = await import('../data/images')
-const { setFeaturedGame } = await import('../data/games')
+const { getGame, setFeaturedGame } = await import('../data/games')
 
 beforeEach(() => {
   rpc.mockReset().mockResolvedValue({ error: null })
   upload.mockReset().mockResolvedValue({ error: null })
   remove.mockReset().mockResolvedValue({ error: null })
+  from.mockReset()
+  maybeSingle.mockReset().mockResolvedValue({ data: null, error: null })
   getPublicUrl.mockReset().mockReturnValue({ data: { publicUrl: 'https://cdn.test/image.png' } })
 })
 
@@ -101,6 +110,18 @@ describe('reading the hourly click series', () => {
   it('throws so the dashboard can show its error state', async () => {
     rpc.mockResolvedValue({ data: null, error: { message: 'permission denied' } })
     await expect(listHourlyClickSeries()).rejects.toThrow(/permission denied/)
+  })
+})
+
+describe('reading one game', () => {
+  it('returns null when there is no row the caller may see', async () => {
+    await expect(getGame('verify-draft')).resolves.toBeNull()
+    expect(from).toHaveBeenCalledWith('games')
+  })
+
+  it('throws on a failed query, so a network error is not reported as "not found"', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: { message: 'Failed to fetch' } })
+    await expect(getGame('beer-game')).rejects.toThrow(/Failed to fetch/)
   })
 })
 

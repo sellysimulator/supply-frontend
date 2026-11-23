@@ -2,8 +2,10 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight, BookOpen, Compass, ExternalLink } from 'lucide-react'
 import {
+  Button,
   ButtonLink,
   Card,
+  ErrorState,
   IconPad,
   LoadingSection,
   Motif,
@@ -45,7 +47,7 @@ function summarise(games: GameSummary[] | null) {
 
 export default function Landing() {
   const { t } = useTranslation()
-  const { data: games, loading } = useAsync(() => listPublishedGames(), [])
+  const { data: games, loading, error, reload } = useAsync(() => listPublishedGames(), [])
 
   const stats = useMemo(() => summarise(games), [games])
   /* The featured game, if one is set, sorts first, so it always makes the cut. */
@@ -156,6 +158,17 @@ export default function Landing() {
 
         {loading ? (
           <LoadingSection label={t('landing.featured.loading')} />
+        ) : error ? (
+          <div className="mt-4">
+            <ErrorState
+              description={t('landing.featured.loadError')}
+              action={
+                <Button variant="secondary" onClick={reload}>
+                  {t('common.tryAgain')}
+                </Button>
+              }
+            />
+          </div>
         ) : preview.length === 0 ? (
           <Card className="mt-4 px-6 py-10 text-center text-muted-foreground">
             {t('landing.featured.empty')}

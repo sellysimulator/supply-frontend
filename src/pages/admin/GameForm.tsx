@@ -44,6 +44,7 @@ export default function GameForm() {
     data: existing,
     loading,
     error,
+    reload,
   } = useAsync(() => (gameId ? getGame(gameId) : Promise.resolve(null)), [gameId])
 
   /* For a new entry the identifier is part of the form, because it becomes the
@@ -122,7 +123,20 @@ export default function GameForm() {
 
   if (isEditing && loading) return <LoadingSection label={t('admin.form.loading')} />
 
-  if (isEditing && (error || !existing)) {
+  if (isEditing && error) {
+    return (
+      <ErrorState
+        description={t('admin.form.loadError')}
+        action={
+          <Button variant="secondary" onClick={reload}>
+            {t('common.tryAgain')}
+          </Button>
+        }
+      />
+    )
+  }
+
+  if (isEditing && !existing) {
     return (
       <ErrorState
         title={t('admin.form.notFoundTitle')}
