@@ -6,7 +6,9 @@
     "close": "Cerrar",
     "closeDialog": "Cerrar el diálogo",
     "somethingWentWrong": "Algo salió mal",
-    "skipToContent": "Ir al contenido"
+    "skipToContent": "Ir al contenido",
+    "reload": "Recargar la página",
+    "appCrashed": "Esta página dejó de funcionar. Recárguela para continuar."
   },
   "nav": {
     "main": "Principal",

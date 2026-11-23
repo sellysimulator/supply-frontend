@@ -6,7 +6,9 @@
     "close": "Close",
     "closeDialog": "Close dialog",
     "somethingWentWrong": "Something went wrong",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "reload": "Reload page",
+    "appCrashed": "This page stopped working. Reload it to continue."
   },
   "nav": {
     "main": "Main",

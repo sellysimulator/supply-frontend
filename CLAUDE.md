@@ -138,7 +138,8 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
 
 ```
 src/
-  main.tsx              providers: ThemeProvider > BrowserRouter > AuthProvider > ScrollToTop
+  main.tsx              providers: ThemeProvider > ErrorBoundary > BrowserRouter > AuthProvider
+                        > ScrollToTop
   App.tsx               every route; the admin area is lazy-loaded
   index.css             design tokens, light and dark palettes, base + components layers
   i18n/
@@ -172,7 +173,8 @@ src/
     ui/                 the primitive layer, barrelled through ui/index.ts
     layout/             Layout (+ PageContainer, PageHeading), BentoGrid, Header,
                         Footer, AdminLayout, Logo, ThemeToggle, LanguageToggle,
-                        ScrollToTop
+                        ScrollToTop, ErrorBoundary (the one top-level boundary:
+                        a render error or failed lazy chunk shows a reload tile)
     catalog/            GameCard, GameMeta, GameThumbnail, CategoryFilter,
                         ScreenshotGallery
     charts/             HourlyClicksChart, TopGamesChart — hand-rolled from the
