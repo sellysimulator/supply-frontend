@@ -26,7 +26,3 @@ export async function deleteCatalogImages(images: StoredImage[]): Promise<void> 
   if (images.length === 0) return
   await supabase.storage.from(CATALOG_IMAGE_BUCKET).remove(images.map((image) => image.path))
 }
-
-export async function deleteCatalogImage(image: StoredImage): Promise<void> {
-  await deleteCatalogImages([image])
-}
