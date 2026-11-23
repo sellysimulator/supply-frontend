@@ -182,7 +182,8 @@ describe('GameForm validation and save feedback', () => {
   it('shows the audience length error instead of failing silently', async () => {
     const user = userEvent.setup()
     renderForm()
-    const audience = await screen.findByLabelText('Intended audience')
+    await screen.findByDisplayValue('Beer Game')
+    const audience = screen.getByLabelText('Intended audience')
 
     await user.clear(audience)
     await user.click(audience)
@@ -196,7 +197,8 @@ describe('GameForm validation and save feedback', () => {
   it('shows an error for a cleared sort order', async () => {
     const user = userEvent.setup()
     renderForm()
-    await user.clear(await screen.findByLabelText('Sort order'))
+    await screen.findByDisplayValue('Beer Game')
+    await user.clear(screen.getByLabelText('Sort order'))
     await user.click(saveButton())
 
     expect(await screen.findByText('Enter a whole number')).toBeInTheDocument()
