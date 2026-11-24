@@ -102,13 +102,12 @@ function toRow(gameId: string, input: GameInput): GameWriteRow {
 /**
  * The public catalog, as the cards that list it render it. Unpublished entries
  * are filtered out by row level security, so this returns only what the caller
- * is allowed to see. The featured game, if any, comes first, so a `limit` never
- * cuts it off. `limit` bounds the row count for callers — like the landing
- * page — that only ever show the first few; the ordering matches the
- * `games_catalog_order_idx (published, featured desc, sort_order, name)` index.
+ * is allowed to see. The featured game, if any, comes first; the ordering
+ * matches the `games_catalog_order_idx (published, featured desc, sort_order,
+ * name)` index.
  */
-export async function listPublishedGames(limit?: number): Promise<GameSummary[]> {
-  let query = supabase
+export async function listPublishedGames(): Promise<GameSummary[]> {
+  const { data, error } = await supabase
     .from(GAMES)
     .select(GAME_SUMMARY_COLUMNS)
     .eq('published', true)
@@ -116,9 +115,6 @@ export async function listPublishedGames(limit?: number): Promise<GameSummary[]>
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
 
-  if (limit !== undefined) query = query.limit(limit)
-
-  const { data, error } = await query
   if (error) throw new Error(error.message)
   return (data ?? []).map(toGameSummary)
 }

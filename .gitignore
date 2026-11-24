@@ -25,6 +25,7 @@ dist-ssr
 
 # Local environment and deploy artefacts
 .env
-.env.local
+.env.*
+!.env.example
 firebase-debug.log
 .firebase/
