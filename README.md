@@ -62,10 +62,14 @@ npm run dev
 1. **Create a project** at supabase.com.
 2. **Apply the schema.** In the SQL editor, run
    `supabase/migrations/0001_catalog.sql`, `supabase/migrations/0002_storage.sql`,
-   then `supabase/migrations/0003_featured_game.sql`. The second creates the
-   `catalog-images` bucket and its policies; the third adds the featured game.
-   An existing project only needs the files it has not run yet — each is safe to
-   run more than once.
+   `supabase/migrations/0003_featured_game.sql`, then
+   `supabase/migrations/0004_storage_admin_select.sql`, in that order. The
+   second creates the `catalog-images` bucket and its policies; the third adds
+   the featured game; the fourth stops visitors listing the bucket (images still
+   load through their public URLs). An existing project only needs the files it
+   has not run yet — each is safe to run more than once — and then step 3 again.
+   Re-running `0002_storage.sql` on its own reopens listing, so follow it with
+   `0004_storage_admin_select.sql`.
 3. **Check the rules hold.** Run `supabase/verify.sql` in the SQL editor. It
    seeds fixtures, asserts what anonymous and non-administrator callers can and
    cannot do, and rolls everything back. Any failure raises an exception; success
@@ -271,7 +275,7 @@ manual: setting the project up, running it, and deploying it.
 ## Testing
 
 ```bash
-npm test    # 115 unit tests in 15 files — summing, schema, pages, components,
+npm test    # 140 unit tests in 19 files — summing, schema, pages, components,
             #   data layer, translation key parity, the theme and language
             #   toggles, untrusted-name escaping, content-security-policy hash,
             #   the Supabase build guard and the hosting workflows
@@ -281,8 +285,9 @@ The access rules are not covered by these: they run inside Postgres, so they are
 verified by running `supabase/verify.sql` against the database. That script is
 the real specification of who can do what — it asserts that unpublished games
 are invisible, that non-administrators cannot write to the catalog, that the
-click counters cannot be read or forged, that the rate limit holds, and that
-nobody can grant themselves administrator.
+click counters cannot be read or forged, that the rate limit holds, that only
+administrators can list or upload catalog images, and that nobody can grant
+themselves administrator.
 
 ## Deployment
 

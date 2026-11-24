@@ -68,7 +68,7 @@ npm install
 npm run dev          # Vite dev server on :5173
 npm run build        # tsc -b && vite build  → dist/
 npm run preview      # serve the built bundle
-npm test             # Vitest, single run (15 files, 115 tests)
+npm test             # Vitest, single run (19 files, 140 tests)
 npm run test:watch
 npm run lint         # oxlint
 npm run format       # prettier --write .
@@ -138,7 +138,8 @@ must **never** gain a `VITE_` prefix — it bypasses row level security.
 
 ```
 src/
-  main.tsx              providers: ThemeProvider > BrowserRouter > AuthProvider > ScrollToTop
+  main.tsx              providers: ThemeProvider > ErrorBoundary > BrowserRouter > AuthProvider
+                        > ScrollToTop
   App.tsx               every route; the admin area is lazy-loaded
   index.css             design tokens, light and dark palettes, base + components layers
   i18n/
@@ -150,7 +151,8 @@ src/
     ThemeProvider.tsx   resolves system/light/dark, toggles `.dark` on <html>
     useTheme.ts
   auth/
-    AuthProvider.tsx    Supabase session + whether the account is in `admins`
+    AuthProvider.tsx    Supabase session + whether the account is in `admins`;
+                        a failed lookup sets `roleCheckFailed` (SignIn offers a retry)
     context.ts useAuth.ts RequireAdmin.tsx
   supabase/
     client.ts           the one Supabase client; CATALOG_IMAGE_BUCKET
@@ -160,6 +162,7 @@ src/
     analytics.ts        record_game_click RPC, the two aggregate reads
     clickMetrics.ts     pure summing helpers (unit-tested)
     images.ts           uploads to games/{gameId}/… in catalog-images
+    admins.ts           isAdministrator — throws on a failed lookup, false for no row
   types/game.ts         zod schema + Game/GameInput/GameSummary + emptyGameInput
   hooks/
     useAsync.ts         the loading/error/data/reload shape every page uses
@@ -172,7 +175,8 @@ src/
     ui/                 the primitive layer, barrelled through ui/index.ts
     layout/             Layout (+ PageContainer, PageHeading), BentoGrid, Header,
                         Footer, AdminLayout, Logo, ThemeToggle, LanguageToggle,
-                        ScrollToTop
+                        ScrollToTop, ErrorBoundary (the one top-level boundary:
+                        a render error or failed lazy chunk shows a reload tile)
     catalog/            GameCard, GameMeta, GameThumbnail, CategoryFilter,
                         ScreenshotGallery
     charts/             HourlyClicksChart, TopGamesChart — hand-rolled from the
@@ -184,7 +188,7 @@ src/
   __tests__/            all tests, plus setup.ts
 
 supabase/migrations/    0001 schema + RLS + analytics functions; 0002 image bucket;
-                        0003 featured game
+                        0003 featured game; 0004 only admins may list the bucket
 supabase/verify.sql     asserts the access rules hold; run it after any policy change
 design-system/selly/MASTER.md   the visual spec (pages/ is currently empty)
 scripts/seed-catalog.mjs        bulk loader (Node, service role); seed-games.json
@@ -250,7 +254,9 @@ with a retry → `EmptyState` → content, inside `PageContainer` + `PageHeading
 query; `useAsync` catches it into `error` and pages render `ErrorState` with a
 `reload` retry. Two deliberate exceptions: `recordGameClick` swallows failures
 (analytics must never block a launch) and `getGame` returns `null` for both
-"missing" and "not allowed to see it", so the public site cannot distinguish.
+"missing" and "not allowed to see it", so the public site cannot distinguish —
+but it still throws when the query itself fails, so a network error shows the
+retry rather than "not found".
 
 **Accessibility is not optional:** visible labels (never placeholder-as-label),
 44px touch targets, a visible focus ring (`:focus-visible` in `@layer base`,
@@ -322,13 +328,14 @@ keep 4.5:1 contrast. Translucent surfaces use the `--overlay` token rather than
 
 ## Testing
 
-`npm test` runs everything in `src/__tests__/` (15 files, 115 tests). The Supabase
+`npm test` runs everything in `src/__tests__/` (19 files, 140 tests). The Supabase
 client is never constructed: `src/data/*` is mocked with `vi.mock`. `setup.ts`
 pins i18next to English (assertions quote the English copy) and stubs
 `matchMedia` for jsdom.
 
-Covered: catalog page behaviour, game card and details, admin games list, terms
-disclosure, click summing, the bento span arithmetic, the zod schema, the data
+Covered: catalog, landing and details pages (including load-error retries), the
+admin games list and game form (deferred image deletion, validation feedback),
+the administrator check, the error boundary, terms disclosure, click summing, the bento span arithmetic, the zod schema, the data
 layer, translation key parity, the language and theme toggles, that an untrusted
 game name renders as text rather than markup, that the
 Content-Security-Policy still matches the inline script it allow-lists, the

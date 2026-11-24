@@ -126,12 +126,14 @@ export async function listPublishedGames(limit?: number): Promise<GameSummary[]>
 /**
  * A single catalog entry. Returns null both when the game does not exist and
  * when the caller may not see it — the public site should not distinguish
- * between the two.
+ * between the two. A failed query throws, so a network error is not shown as
+ * "not found".
  */
 export async function getGame(gameId: string): Promise<Game | null> {
   const { data, error } = await supabase.from(GAMES).select('*').eq('id', gameId).maybeSingle()
 
-  if (error || !data) return null
+  if (error) throw new Error(error.message)
+  if (!data) return null
   return toGame(data)
 }
 

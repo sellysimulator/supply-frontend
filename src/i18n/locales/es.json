@@ -6,7 +6,9 @@
     "close": "Cerrar",
     "closeDialog": "Cerrar el diálogo",
     "somethingWentWrong": "Algo salió mal",
-    "skipToContent": "Ir al contenido"
+    "skipToContent": "Ir al contenido",
+    "reload": "Recargar la página",
+    "appCrashed": "Esta página dejó de funcionar. Recárguela para continuar."
   },
   "nav": {
     "main": "Principal",
@@ -60,7 +62,8 @@
       "description": "Una selección de lo que está disponible ahora mismo.",
       "viewAll": "Ver todos",
       "loading": "Cargando los juegos",
-      "empty": "Todavía no se ha publicado ningún juego. Vuelva a consultarlo pronto."
+      "empty": "Todavía no se ha publicado ningún juego. Vuelva a consultarlo pronto.",
+      "loadError": "No se pudieron cargar los juegos. Compruebe su conexión e inténtelo de nuevo."
     },
     "stats": {
       "heading": "Selly en cifras",
@@ -146,7 +149,8 @@
     "launch": "Abrir el juego",
     "launchNote": "Se abre en una pestaña nueva. Este juego se opera de forma independiente a Selly.",
     "resources": "Instrucciones y recursos",
-    "tags": "Etiquetas"
+    "tags": "Etiquetas",
+    "loadError": "No se pudo cargar este juego. Compruebe su conexión e inténtelo de nuevo."
   },
   "notFound": {
     "eyebrow": "Error 404",
@@ -167,7 +171,8 @@
     "grantAccessBody": "En el editor SQL de Supabase, ejecute <0></0> con el identificador de usuario que aparece debajo y recargue esta página.",
     "copy": "Copiar",
     "copied": "Copiado",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "roleCheckFailed": "No se pudo comprobar su acceso de administrador. Compruebe su conexión e inténtelo de nuevo."
   },
   "admin": {
     "title": "Administración",
@@ -247,7 +252,7 @@
     "form": {
       "loading": "Cargando el juego",
       "notFoundTitle": "Juego no encontrado",
-      "notFoundDescription": "No se pudo cargar esta entrada del catálogo.",
+      "notFoundDescription": "Esta entrada del catálogo no existe. Puede que se haya eliminado.",
       "back": "Volver a los juegos",
       "edit": "Editar {{name}}",
       "add": "Añadir un juego",
@@ -290,7 +295,8 @@
       "sortOrder": "Orden",
       "sortOrderHint": "Los números más bajos aparecen primero en el catálogo.",
       "published": "Publicado",
-      "publishedHint": "Los juegos publicados son visibles para todo el mundo en el catálogo público."
+      "publishedHint": "Los juegos publicados son visibles para todo el mundo en el catálogo público.",
+      "loadError": "No se pudo cargar esta entrada del catálogo. Compruebe su conexión e inténtelo de nuevo."
     },
     "images": {
       "addImages": "Añadir imágenes",

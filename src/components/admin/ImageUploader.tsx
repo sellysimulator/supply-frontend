@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { Button, Spinner } from '../ui'
-import { deleteCatalogImage, uploadCatalogImage } from '../../data/images'
+import { uploadCatalogImage } from '../../data/images'
 import type { StoredImage } from '../../types/game'
 
 /**
@@ -49,16 +49,11 @@ export function ImageUploader({
     }
   }
 
-  /* The stored file is removed as well as the reference, so unpublishing an
-     image does not leave an orphan in the bucket. A failed delete still drops
-     the reference — a stale object is harmless, a broken link is not. */
-  const removeImage = async (image: StoredImage) => {
+  /* Only the reference is dropped here. The saved entry may still point at the
+     file, so the form deletes it after a successful save — never before, or
+     cancelling would leave the published game showing a broken image. */
+  const removeImage = (image: StoredImage) => {
     onChange(images.filter((entry) => entry.path !== image.path))
-    try {
-      await deleteCatalogImage(image)
-    } catch {
-      /* ignored on purpose */
-    }
   }
 
   return (
@@ -105,7 +100,7 @@ export function ImageUploader({
               />
               <button
                 type="button"
-                onClick={() => void removeImage(image)}
+                onClick={() => removeImage(image)}
                 aria-label={t('admin.images.remove')}
                 className="absolute top-1.5 right-1.5 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-border bg-card text-muted-foreground shadow-tile transition-colors duration-200 hover:border-destructive hover:text-destructive"
               >

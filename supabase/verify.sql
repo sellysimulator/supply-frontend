@@ -434,7 +434,97 @@ begin
   raise notice 'featured game: OK';
 end $$;
 
+-- ─── Catalog images ─────────────────────────────────────────────────────────
+-- Still acting as the administrator. The fixture row is written through the
+-- same insert policy the Storage API uses, so this also proves an
+-- administrator can upload. Only administrators may list the bucket (they need
+-- the select policy to delete and overwrite); visitors load images through
+-- public object URLs, which do not consult these policies.
+
+do $$
+declare
+  v_count integer;
+begin
+  insert into storage.objects (bucket_id, name)
+  values ('catalog-images', 'games/verify-published/verify-fixture.png');
+
+  select count(*) into v_count from storage.objects
+    where bucket_id = 'catalog-images'
+      and name = 'games/verify-published/verify-fixture.png';
+  if v_count <> 1 then
+    raise exception 'an administrator cannot read a catalog image row, saw %', v_count;
+  end if;
+
+  raise notice 'catalog images, administrator: OK';
+end $$;
+
 reset role;
+
+set local role anon;
+set local request.jwt.claims = '{"role":"anon"}';
+
+do $$
+declare
+  v_count integer := 0;
+  v_blocked boolean;
+begin
+  begin
+    select count(*) into v_count from storage.objects where bucket_id = 'catalog-images';
+  exception when insufficient_privilege then v_count := 0;
+  end;
+  if v_count <> 0 then raise exception 'anon can list the catalog images'; end if;
+
+  v_blocked := false;
+  begin
+    insert into storage.objects (bucket_id, name)
+    values ('catalog-images', 'games/verify-published/anon-upload.png');
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'anon can upload a catalog image'; end if;
+
+  raise notice 'catalog images, anonymous: OK';
+end $$;
+
+reset role;
+
+set local role authenticated;
+set local request.jwt.claims =
+  '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+
+do $$
+declare
+  v_count integer := 0;
+  v_blocked boolean;
+begin
+  begin
+    select count(*) into v_count from storage.objects where bucket_id = 'catalog-images';
+  exception when insufficient_privilege then v_count := 0;
+  end;
+  if v_count <> 0 then
+    raise exception 'a non-administrator can list the catalog images';
+  end if;
+
+  v_blocked := false;
+  begin
+    insert into storage.objects (bucket_id, name)
+    values ('catalog-images', 'games/verify-published/user-upload.png');
+  exception when others then v_blocked := true;
+  end;
+  if not v_blocked then raise exception 'a non-administrator can upload a catalog image'; end if;
+
+  raise notice 'catalog images, signed-in non-administrator: OK';
+end $$;
+
+reset role;
+
+do $$
+begin
+  if not exists (select 1 from storage.buckets where id = 'catalog-images' and public) then
+    raise exception 'the catalog-images bucket is not public, so visitors cannot load images';
+  end if;
+
+  raise notice 'catalog images, public bucket: OK';
+end $$;
 
 rollback;
 

@@ -62,7 +62,14 @@ export const gameInputSchema = z.object({
   screenshots: z.array(storedImageSchema).default([]),
   launchUrl: httpsUrl,
   published: z.boolean().default(false),
-  sortOrder: z.number().int().default(0),
+  /* A cleared number input reads as NaN; reject it with a message the form can show. */
+  sortOrder: z
+    .number({
+      required_error: 'validation.numberRequired',
+      invalid_type_error: 'validation.numberRequired',
+    })
+    .int('validation.numberRequired')
+    .default(0),
 })
 
 export const gameFormSchema = gameInputSchema.refine((game) => game.maxPlayers >= game.minPlayers, {

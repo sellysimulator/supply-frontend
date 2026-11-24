@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ExternalLink, FileText } from 'lucide-react'
 import {
   Badge,
+  Button,
   ButtonExternal,
   ButtonLink,
   Card,
@@ -27,7 +28,7 @@ import { useAsync } from '../hooks/useAsync'
 export default function GameDetails() {
   const { t } = useTranslation()
   const { gameId = '' } = useParams<{ gameId: string }>()
-  const { data: game, loading, error } = useAsync(() => getGame(gameId), [gameId])
+  const { data: game, loading, error, reload } = useAsync(() => getGame(gameId), [gameId])
 
   if (loading) {
     return (
@@ -37,7 +38,22 @@ export default function GameDetails() {
     )
   }
 
-  if (error || !game || !game.published) {
+  if (error) {
+    return (
+      <PageContainer>
+        <ErrorState
+          description={t('details.loadError')}
+          action={
+            <Button variant="secondary" onClick={reload}>
+              {t('common.tryAgain')}
+            </Button>
+          }
+        />
+      </PageContainer>
+    )
+  }
+
+  if (!game || !game.published) {
     return (
       <PageContainer>
         <ErrorState

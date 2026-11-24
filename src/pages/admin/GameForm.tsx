@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Controller, useForm, type Resolver } from 'react-hook-form'
@@ -20,7 +20,14 @@ import {
 import { ImageUploader } from '../../components/admin/ImageUploader'
 import { ResourceListEditor } from '../../components/admin/ResourceListEditor'
 import { createGame, gameIdExists, getGame, updateGame } from '../../data/games'
-import { emptyGameInput, gameFormSchema, gameIdSchema, type GameInput } from '../../types/game'
+import { deleteCatalogImages } from '../../data/images'
+import {
+  emptyGameInput,
+  gameFormSchema,
+  gameIdSchema,
+  type GameInput,
+  type StoredImage,
+} from '../../types/game'
 import { useAsync } from '../../hooks/useAsync'
 
 /** `Beer Game` → `beer-game`. Suggested for new entries, always editable. */
@@ -44,6 +51,7 @@ export default function GameForm() {
     data: existing,
     loading,
     error,
+    reload,
   } = useAsync(() => (gameId ? getGame(gameId) : Promise.resolve(null)), [gameId])
 
   /* For a new entry the identifier is part of the form, because it becomes the
@@ -58,6 +66,15 @@ export default function GameForm() {
   const [saveFailed, setSaveFailed] = useState(false)
 
   const message = (key?: string) => (key ? t(key) : undefined)
+
+  /* Every image this form has referenced: the saved ones plus any uploaded
+     here. Removing or replacing one only drops the reference; once a save
+     succeeds, the files no longer referenced are deleted. Nothing is deleted
+     before that, so cancelling leaves the saved entry and its files intact. */
+  const heldImages = useRef(new Map<string, StoredImage>())
+  const holdImages = (images: (StoredImage | null)[]) => {
+    for (const image of images) if (image) heldImages.current.set(image.path, image)
+  }
 
   const {
     register,
@@ -82,6 +99,7 @@ export default function GameForm() {
       } = existing
       reset(input)
       setSlug(existing.id)
+      holdImages([existing.thumbnail, ...existing.screenshots])
     }
   }, [existing, reset])
 
@@ -102,27 +120,46 @@ export default function GameForm() {
         setSlugErrorKey(parsed.error.issues[0]?.message ?? 'validation.identifierFormat')
         return
       }
-      if (await gameIdExists(slug)) {
-        setSlugErrorKey('admin.form.identifierTaken')
-        return
-      }
     }
 
     try {
       if (isEditing && gameId) {
         await updateGame(gameId, values)
       } else {
+        if (await gameIdExists(slug)) {
+          setSlugErrorKey('admin.form.identifierTaken')
+          return
+        }
         await createGame(slug, values)
       }
-      navigate('/admin/games')
     } catch {
       setSaveFailed(true)
+      return
     }
+
+    /* Best effort: a leftover file is harmless, a broken link is not. */
+    const kept = new Set([values.thumbnail, ...values.screenshots].map((image) => image?.path))
+    const discarded = [...heldImages.current.values()].filter((image) => !kept.has(image.path))
+    void deleteCatalogImages(discarded).catch(() => undefined)
+    navigate('/admin/games')
   })
 
   if (isEditing && loading) return <LoadingSection label={t('admin.form.loading')} />
 
-  if (isEditing && (error || !existing)) {
+  if (isEditing && error) {
+    return (
+      <ErrorState
+        description={t('admin.form.loadError')}
+        action={
+          <Button variant="secondary" onClick={reload}>
+            {t('common.tryAgain')}
+          </Button>
+        }
+      />
+    )
+  }
+
+  if (isEditing && !existing) {
     return (
       <ErrorState
         title={t('admin.form.notFoundTitle')}
@@ -287,7 +324,11 @@ export default function GameForm() {
             </Field>
           </div>
 
-          <Field label={t('admin.form.audience')} hint={t('admin.form.audienceHint')}>
+          <Field
+            label={t('admin.form.audience')}
+            hint={t('admin.form.audienceHint')}
+            error={message(errors.audience?.message)}
+          >
             {({ id, describedBy }) => (
               <Input id={id} aria-describedby={describedBy} {...register('audience')} />
             )}
@@ -365,7 +406,10 @@ export default function GameForm() {
                   label={t('admin.form.thumbnail')}
                   gameId={effectiveId}
                   images={field.value ? [field.value] : []}
-                  onChange={(next) => field.onChange(next[0] ?? null)}
+                  onChange={(next) => {
+                    holdImages(next)
+                    field.onChange(next[0] ?? null)
+                  }}
                 />
               )}
             />
@@ -381,7 +425,10 @@ export default function GameForm() {
                   label={t('admin.form.screenshots')}
                   gameId={effectiveId}
                   images={field.value ?? []}
-                  onChange={field.onChange}
+                  onChange={(next) => {
+                    holdImages(next)
+                    field.onChange(next)
+                  }}
                   multiple
                 />
               )}
@@ -422,7 +469,11 @@ export default function GameForm() {
             />
           </div>
 
-          <Field label={t('admin.form.sortOrder')} hint={t('admin.form.sortOrderHint')}>
+          <Field
+            label={t('admin.form.sortOrder')}
+            hint={t('admin.form.sortOrderHint')}
+            error={message(errors.sortOrder?.message)}
+          >
             {({ id, describedBy }) => (
               <Input
                 id={id}

@@ -35,6 +35,12 @@ describe('game form validation', () => {
     expect(result.success).toBe(false)
   })
 
+  it('rejects a cleared sort order (NaN) with a translatable message', () => {
+    const result = gameFormSchema.safeParse({ ...valid, sortOrder: Number.NaN })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.message).toBe('validation.numberRequired')
+  })
+
   it('rejects a maximum player count below the minimum', () => {
     const result = gameFormSchema.safeParse({ ...valid, minPlayers: 8, maxPlayers: 2 })
     expect(result.success).toBe(false)

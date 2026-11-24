@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../supabase/client'
+import { isAdministrator } from '../data/admins'
 import { AuthContext, type AuthState } from './context'
 
 /**
@@ -15,7 +16,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /* The resolved role is stored together with the id it belongs to, so "still
      checking" is derived during render rather than toggled from inside the
      effect, which would start a second render on every sign-in. */
-  const [role, setRole] = useState<{ userId: string; isAdmin: boolean } | null>(null)
+  const [role, setRole] = useState<{
+    userId: string
+    isAdmin: boolean
+    failed: boolean
+  } | null>(null)
+  const [roleAttempt, setRoleAttempt] = useState(0)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -37,16 +43,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false
 
-    // A user may read only their own row, so an empty result means "not an
-    // administrator" rather than an error worth surfacing.
-    supabase
-      .from('admins')
-      .select('user_id')
-      .eq('user_id', userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setRole({ userId, isAdmin: data !== null })
-      })
+    // A failed lookup is kept apart from "not an administrator", so a network
+    // error offers a retry instead of telling a real administrator otherwise.
+    isAdministrator(userId).then(
+      (isAdmin) => {
+        if (!cancelled) setRole({ userId, isAdmin, failed: false })
+      },
+      () => {
+        if (!cancelled) setRole({ userId, isAdmin: false, failed: true })
+      },
+    )
 
     return () => {
       cancelled = true
@@ -56,10 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // back a new `User` object for the same signed-in account, and re-running
     // this effect on each one would re-query `admins` for no reason.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id])
+  }, [user?.id, roleAttempt])
 
   const isAdmin = user !== null && role?.userId === user.id && role.isAdmin
   const checkingRole = user !== null && role?.userId !== user.id
+  const roleCheckFailed = user !== null && role?.userId === user.id && role.failed
+
+  const retryRoleCheck = useCallback(() => {
+    setRole(null)
+    setRoleAttempt((attempt) => attempt + 1)
+  }, [])
 
   const signIn = useCallback(async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -75,8 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthState>(
-    () => ({ user, loading, isAdmin, checkingRole, signIn, signOut }),
-    [user, loading, isAdmin, checkingRole, signIn, signOut],
+    () => ({
+      user,
+      loading,
+      isAdmin,
+      checkingRole,
+      roleCheckFailed,
+      retryRoleCheck,
+      signIn,
+      signOut,
+    }),
+    [user, loading, isAdmin, checkingRole, roleCheckFailed, retryRoleCheck, signIn, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

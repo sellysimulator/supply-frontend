@@ -12,6 +12,10 @@ export type AuthState = {
   isAdmin: boolean
   /** True until the administrator role has been resolved for the current user. */
   checkingRole: boolean
+  /** True when the administrator lookup itself failed (for example, offline). */
+  roleCheckFailed: boolean
+  /** Runs the administrator lookup again after it failed. */
+  retryRoleCheck: () => void
   signIn: () => Promise<void>
   signOut: () => Promise<void>
 }

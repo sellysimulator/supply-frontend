@@ -93,6 +93,19 @@ describe('Game details page', () => {
     expect(await screen.findByText('Game not found')).toBeInTheDocument()
   })
 
+  it('shows a load error with a retry, not "not found", when the read fails', async () => {
+    getGame.mockRejectedValueOnce(new Error('Failed to fetch')).mockResolvedValueOnce(game)
+    renderDetails()
+
+    expect(await screen.findByText(/this game could not be loaded/i)).toBeInTheDocument()
+    expect(screen.queryByText('Game not found')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Tequila Game' }),
+    ).toBeInTheDocument()
+  })
+
   it('treats a missing game as not found', async () => {
     getGame.mockResolvedValue(null)
     renderDetails()
