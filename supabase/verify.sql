@@ -357,8 +357,10 @@ begin
     raise exception 'click_series_hourly(48) should end on the current UTC hour';
   end if;
 
-  select coalesce(sum(click_count), 0) into v_series_sum from public.click_series_hourly(48);
-  select coalesce(sum(click_count), 0) into v_totals_sum from public.click_totals_by_game(30);
+  -- The same window on both sides: a day of totals reaches back 24 hours from
+  -- the current hour, which is 25 hourly buckets.
+  select coalesce(sum(click_count), 0) into v_series_sum from public.click_series_hourly(25);
+  select coalesce(sum(click_count), 0) into v_totals_sum from public.click_totals_by_game(1);
   if v_series_sum <> v_totals_sum then
     raise exception
       'click_series_hourly and click_totals_by_game disagree: % vs %',
