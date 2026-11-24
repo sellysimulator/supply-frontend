@@ -200,10 +200,6 @@ requireSupabaseEnv.ts           build guard against an empty or wrong Supabase U
 Components are `PascalCase.tsx`, hooks/lib/data are `camelCase.ts`. Tests are
 `src/__tests__/<Subject>.test.{ts,tsx}` — they do **not** sit next to the code.
 
-Dead scaffolding left by the Firebase CLI: `public/index.html` (the "Welcome to
-Firebase Hosting" page, shadowed by the built `index.html`) and `public/404.html`
-(unreachable behind the SPA rewrite). `public/favicon.svg` is real.
-
 ## Conventions that matter
 
 **Never call Supabase from a component.** Add a function to `src/data/` instead.

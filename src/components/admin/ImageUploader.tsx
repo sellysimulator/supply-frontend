@@ -6,9 +6,9 @@ import { uploadCatalogImage } from '../../data/images'
 import type { StoredImage } from '../../types/game'
 
 /**
- * Uploads catalog images to `games/{gameId}/…`, the only path storage.rules
- * permits. Uploading requires the identifier to exist first, because it decides
- * where the file lands.
+ * Uploads catalog images to `games/{gameId}/…`. Uploading requires the
+ * identifier to exist first, because it decides where the file lands. Who may
+ * upload is decided by the bucket's policies (supabase/migrations).
  */
 export function ImageUploader({
   gameId,

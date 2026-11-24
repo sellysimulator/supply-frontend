@@ -100,7 +100,16 @@
     "duration_minutes": 60,
     "categories": ["Simulation", "Multiplayer"],
     "tags": ["perishables", "futures", "incoterms", "spoilage", "reputation", "cooperation"],
-    "resources": [],
+    "resources": [
+      {
+        "label": "Player manual",
+        "url": "https://pulkysim.web.app/player-manual"
+      },
+      {
+        "label": "Host manual",
+        "url": "https://pulkysim.web.app/host-manual"
+      }
+    ],
     "launch_url": "https://pulkysim.web.app",
     "published": true,
     "sort_order": 3

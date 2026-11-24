@@ -82,7 +82,9 @@ npm run dev
    deployed origin to the redirect allow list. Sign-in is a redirect flow and
    will fail without this.
 6. **Fill in `.env`** from _Project Settings → Data API_: the project URL and the
-   anon (publishable) key. Only these two values; see `.env.example`.
+   anon (publishable) key. The site needs only these two. The seed scripts also
+   need `SUPABASE_SECRET_KEY` (see "Seeding the catalog"); it never goes into
+   the site or into CI. See `.env.example`.
 
 ### Becoming an administrator
 
@@ -308,6 +310,28 @@ local deploy the same way, run `REQUIRE_SUPABASE_ENV=1 npm run deploy`.
 The Firebase project (`supply-739a5`) and hosting site (`supply-catalog`) keep
 the pre-rebrand name deliberately: a Firebase project id cannot be renamed, and
 renaming the hosting site was decided against.
+
+## Backups
+
+Take your own backups now and then, and before a migration that drops or rewrites data:
+
+- **The database:** copy the session pooler connection string from the project's
+  _Connect_ dialog and dump the catalog's schema. Accounts live in Supabase's own
+  `auth` schema, so after a restore into a new project, sign in and add the
+  `admins` row again ("Becoming an administrator").
+
+  ```bash
+  pg_dump "<session pooler connection string>" --schema=public \
+    --format=custom --no-owner --no-privileges --file=catalog-$(date +%F).dump
+  ```
+
+- **The images:** with the Supabase CLI linked to the project, copy the bucket:
+
+  ```bash
+  supabase storage cp -r ss:///catalog-images ./catalog-images-backup --experimental
+  ```
+
+Keep both outside the repository.
 
 ## Not built yet
 
